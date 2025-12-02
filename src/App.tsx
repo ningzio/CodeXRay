@@ -144,80 +144,87 @@ const AlgorithmRunner = ({ config, language }: { config: AlgoConfig<any>, langua
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-      {/* Main Stage: 8 columns */}
-      <div className="lg:col-span-8 flex flex-col gap-6">
-
+      {/* Main Stage Wrapper: Visualizer + Logs */}
+      <div className="contents lg:flex lg:flex-col lg:col-span-8 lg:gap-6">
         {/* Visualizer Window */}
-        <Card className="relative overflow-hidden min-h-[400px] flex flex-col p-0">
-          <div className="absolute top-4 right-4 z-10">
-            <button
-              onClick={handleDataReset}
-              className="px-3 py-1.5 bg-white/10 backdrop-blur hover:bg-white/20 text-slate-600 dark:text-slate-300 text-xs font-medium rounded-lg transition-colors border border-white/10"
-            >
-              {config.type === 'sorting' ? '随机重置数据' : '重置图'}
-            </button>
-          </div>
-
-          <div className="flex-1 flex items-center justify-center bg-slate-100/50 dark:bg-slate-900/50 relative">
-            {/* Grid Pattern Background */}
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:20px_20px]"></div>
-
-            <div className="relative z-0 w-full px-8">
-              <VisualizerComponent step={player.currentStep} />
+        <div className="order-1 lg:order-none">
+          <Card className="relative overflow-hidden min-h-[400px] flex flex-col p-0">
+            <div className="absolute top-4 right-4 z-10">
+              <button
+                onClick={handleDataReset}
+                className="px-3 py-1.5 bg-white/10 backdrop-blur hover:bg-white/20 text-slate-600 dark:text-slate-300 text-xs font-medium rounded-lg transition-colors border border-white/10"
+              >
+                {config.type === 'sorting' ? '随机重置数据' : '重置图'}
+              </button>
             </div>
-          </div>
 
-          {/* Player Controls Bar (Floating-like at bottom) */}
-          <div className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4">
-            <PlayerControls
-              isPlaying={player.isPlaying}
-              currentStep={player.currentStepIndex}
-              totalSteps={player.totalSteps}
-              speed={player.speed}
-              onTogglePlay={player.controls.togglePlay}
-              onNext={player.controls.next}
-              onPrev={player.controls.prev}
-              onReset={player.controls.reset}
-              onSeek={player.controls.seek}
-              onSpeedChange={player.setSpeed}
-            />
-          </div>
-        </Card>
+            <div className="flex-1 flex items-center justify-center bg-slate-100/50 dark:bg-slate-900/50 relative">
+              {/* Grid Pattern Background */}
+              <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:20px_20px]"></div>
+
+              <div className="relative z-0 w-full px-8">
+                <VisualizerComponent step={player.currentStep} />
+              </div>
+            </div>
+
+            {/* Player Controls Bar (Floating-like at bottom) */}
+            <div className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4">
+              <PlayerControls
+                isPlaying={player.isPlaying}
+                currentStep={player.currentStepIndex}
+                totalSteps={player.totalSteps}
+                speed={player.speed}
+                onTogglePlay={player.controls.togglePlay}
+                onNext={player.controls.next}
+                onPrev={player.controls.prev}
+                onReset={player.controls.reset}
+                onSeek={player.controls.seek}
+                onSpeedChange={player.setSpeed}
+              />
+            </div>
+          </Card>
+        </div>
 
         {/* Log Console */}
-        <Card title="执行日志" className="min-h-[100px] font-mono text-sm">
-          <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-            <span className="text-blue-500">➜</span>
-            <span>{player.currentStep.log || "准备就绪"}</span>
-          </div>
-        </Card>
+        <div className="order-3 lg:order-none">
+          <Card title="执行日志" className="min-h-[100px] font-mono text-sm">
+            <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+              <span className="text-blue-500">➜</span>
+              <span>{player.currentStep.log || "准备就绪"}</span>
+            </div>
+          </Card>
+        </div>
       </div>
 
-      {/* Sidebar: 4 columns */}
-      <div className="lg:col-span-4 flex flex-col gap-6 h-full">
+      {/* Sidebar Wrapper: Code + Intel */}
+      <div className="contents lg:flex lg:flex-col lg:col-span-4 lg:gap-6 lg:h-full">
         {/* Code X-Ray */}
-        <Card title="代码透视" className="flex-1 min-h-[400px] flex flex-col p-0 overflow-hidden">
-          <CodeViewer
-            code={config.code[language]}
-            activeLabel={player.currentStep.codeLabel}
-          />
-        </Card>
+        <div className="order-2 lg:order-none flex-1 flex flex-col">
+          <Card title="代码透视" className="flex-1 min-h-[400px] flex flex-col p-0 overflow-hidden">
+            <CodeViewer
+              code={config.code[language]}
+              activeLabel={player.currentStep.codeLabel}
+            />
+          </Card>
+        </div>
 
         {/* Algorithm Intel */}
-        <Card title="算法情报" className="min-h-[150px]">
-          <div className="space-y-4">
-            <div>
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">时间复杂度</span>
-              <p className="text-xl font-bold text-slate-700 dark:text-slate-200 mt-1 font-mono">{config.complexity}</p>
+        <div className="order-4 lg:order-none">
+          <Card title="算法情报" className="min-h-[150px]">
+            <div className="space-y-4">
+              <div>
+                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">时间复杂度</span>
+                <p className="text-xl font-bold text-slate-700 dark:text-slate-200 mt-1 font-mono">{config.complexity}</p>
+              </div>
+              <div>
+                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">核心思路</span>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
+                  {config.description}
+                </p>
+              </div>
             </div>
-            <div>
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">核心思路</span>
-              <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
-                {config.description}
-              </p>
-            </div>
-          </div>
-        </Card>
+          </Card>
+        </div>
       </div>
     </div>
   );
@@ -272,7 +279,8 @@ function App() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+          {/* Language Selector: Desktop Buttons */}
+          <div className="hidden lg:flex items-center gap-2 bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
             {Object.entries(LANGUAGES).map(([key, label]) => (
               <button
                 key={key}
@@ -285,6 +293,20 @@ function App() {
                 {label}
               </button>
             ))}
+          </div>
+
+          {/* Language Selector: Mobile Dropdown */}
+          <div className="block lg:hidden w-full sm:w-auto">
+            <Dropdown
+              options={Object.entries(LANGUAGES).map(([key, label]) => ({
+                value: key,
+                label: label,
+              }))}
+              value={language}
+              onChange={(value) => setLanguage(value as SupportedLanguage)}
+              placeholder="选择语言"
+              className="min-w-[140px]"
+            />
           </div>
         </div>
 
