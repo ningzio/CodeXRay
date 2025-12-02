@@ -5,10 +5,11 @@ export type AlgorithmStep<T> = {
   secondaryIndices?: number[]; // Indices of secondary interest (e.g., sorted partition)
   activeRange?: [number, number]; // Range [start, end] currently being processed
   codeLabel?: string; // The label of the code line to highlight (e.g., 'compare', 'swap')
+  highlightedEdgeId?: string; // [New] For highlighting a specific edge in graph algorithms
 };
 
-// The generator function signature
-export type AlgorithmGenerator<T> = (initialData: T) => Generator<AlgorithmStep<T>, void, unknown>;
+// The generator function signature now accepts additional optional arguments
+export type AlgorithmGenerator<T> = (initialData: T, ...args: any[]) => Generator<AlgorithmStep<T>, void, unknown>;
 
 export type SupportedLanguage = 'javascript' | 'python' | 'go';
 
