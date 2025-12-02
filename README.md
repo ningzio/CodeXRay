@@ -1,73 +1,60 @@
-# React + TypeScript + Vite
+# CodeXRay: 算法原理可视化与多语言代码同步解析
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 项目简介
 
-Currently, two official plugins are available:
+CodeXRay 是一个交互式的算法可视化工具，旨在帮助用户直观地理解排序算法的内部工作原理。它将算法动画、实时日志输出与代码高亮同步展示，并支持多种编程语言的代码切换，让学习者能够以自己熟悉的语言追踪算法的每一步执行。
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 主要特性
 
-## React Compiler
+-   **动画式算法可视化**：动态展示排序过程中数据元素的移动和比较。
+-   **递归范围高亮**：特别针对像快速排序这样的递归算法，通过视觉手段清晰地展现当前处理的子数组范围。
+-   **多语言代码同步**：支持 JavaScript、Python、Go 等多种语言的算法代码展示，并且代码行高亮与动画完美同步。
+-   **实时执行日志**：详细记录算法每一步操作，帮助理解决策过程。
+-   **响应式布局**：优化了界面布局，确保在不同设备上都能获得良好的体验。
+-   **全中文界面**：为中文用户提供友好的学习环境。
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 已实现算法
 
-## Expanding the ESLint configuration
+-   **冒泡排序 (Bubble Sort)**
+-   **快速排序 (Quick Sort)**
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 技术栈
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+-   **Frontend**: React, TypeScript, Vite
+-   **Styling**: Tailwind CSS
+-   **Animation**: Framer Motion
+-   **Code Parsing**: 自定义解析器 (支持 `// @label:tag` 和 `# @label:tag` 标记)
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## 本地运行
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+要将 CodeXRay 部署到您的本地机器上，请遵循以下步骤：
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+1.  **克隆仓库:**
+    ```bash
+    git clone https://github.com/your-username/CodeXRay.git
+    cd CodeXRay
+    ```
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+2.  **安装依赖:**
+    ```bash
+    npm install
+    ```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+3.  **启动开发服务器:**
+    ```bash
+    npm run dev
+    ```
+    应用将在 `http://localhost:5173/` 上运行。
+
+4.  **构建生产版本 (可选):**
+    ```bash
+    npm run build
+    ```
+
+## 贡献
+
+欢迎社区贡献！如果您有新的算法、语言实现或其他功能改进，请随时提交 Pull Request。
+
+## 许可证
+
+MIT License
