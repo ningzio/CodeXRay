@@ -7,7 +7,7 @@ export const bubbleSort: AlgorithmGenerator<number[]> = function* (inputArray: n
 
   yield {
     state: [...arr],
-    log: "Starting Bubble Sort...",
+    log: "开始冒泡排序...",
     highlightIndices: [],
     secondaryIndices: []
   };
@@ -17,7 +17,7 @@ export const bubbleSort: AlgorithmGenerator<number[]> = function* (inputArray: n
       // Compare arr[j] and arr[j+1]
       yield {
         state: [...arr],
-        log: `Comparing ${arr[j]} and ${arr[j + 1]}`,
+        log: `比较 ${arr[j]} 和 ${arr[j + 1]}`,
         highlightIndices: [j, j + 1],
         secondaryIndices: [n - i] // Boundary of sorted portion
       };
@@ -28,7 +28,7 @@ export const bubbleSort: AlgorithmGenerator<number[]> = function* (inputArray: n
         
         yield {
           state: [...arr],
-          log: `Swapped ${arr[j]} (was ${arr[j+1]}) and ${arr[j+1]} (was ${arr[j]})`,
+          log: `交换 ${arr[j]} 和 ${arr[j+1]}`,
           highlightIndices: [j, j + 1],
           secondaryIndices: [n - i]
         };
@@ -37,7 +37,7 @@ export const bubbleSort: AlgorithmGenerator<number[]> = function* (inputArray: n
     // Element at n-i-1 is now sorted
     yield {
       state: [...arr],
-      log: `Element ${arr[n - i - 1]} is now in its sorted position`,
+      log: `元素 ${arr[n - i - 1]} 已归位`,
       highlightIndices: [],
       secondaryIndices: [n - i - 1] // Mark as sorted
     };
@@ -45,7 +45,7 @@ export const bubbleSort: AlgorithmGenerator<number[]> = function* (inputArray: n
 
   yield {
     state: [...arr],
-    log: "Sorting completed!",
+    log: "排序完成!",
     highlightIndices: [],
     secondaryIndices: []
   };

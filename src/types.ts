@@ -3,6 +3,7 @@ export type AlgorithmStep<T> = {
   log?: string;
   highlightIndices?: number[]; // Indices of elements to highlight (e.g., actively comparing)
   secondaryIndices?: number[]; // Indices of secondary interest (e.g., sorted partition)
+  activeRange?: [number, number]; // Range [start, end] currently being processed
 };
 
 // The generator function signature
