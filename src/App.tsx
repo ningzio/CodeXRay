@@ -3,6 +3,7 @@ import { bubbleSort, BUBBLE_SORT_CODE } from './modules/Sorting/algorithms/bubbl
 import { quickSort, QUICK_SORT_CODE } from './modules/Sorting/algorithms/quickSort';
 import { SortingVisualizer } from './modules/Sorting/components/SortingVisualizer';
 import { bfsAlgorithm, BFS_CODE } from './modules/Graph/algorithms/bfs';
+import { dfsAlgorithm, DFS_CODE } from './modules/Graph/algorithms/dfs';
 import { GraphVisualizer } from './modules/Graph/components/GraphVisualizer';
 import { PlayerControls } from './components/ui/PlayerControls';
 import { CodeViewer } from './components/ui/CodeViewer';
@@ -84,6 +85,17 @@ const ALGORITHMS: Record<string, AlgoConfig<any>> = {
     complexity: 'O(V + E)',
     description: '从图的某个节点出发，首先访问该节点本身，然后访问其所有未访问的邻居节点，再依次访问这些邻居节点的未访问邻居，以此类推。BFS 总是优先探索离起始节点最近的节点，因此常用于查找最短路径或遍历连通分量。',
     code: BFS_CODE,
+    getInitialData: () => SAMPLE_GRAPH,
+    Visualizer: GraphVisualizer,
+    type: 'graph',
+    startNodeId: 'A',
+  },
+  dfs: {
+    name: '深度优先搜索 (DFS)',
+    func: dfsAlgorithm,
+    complexity: 'O(V + E)',
+    description: '从图的某个节点出发，尽可能深地搜索树的分支。当节点v的所在边都已被探寻过，搜索将回溯到发现节点v的那条边的起始节点。这一过程一直进行到已发现从源节点可达的所有节点为止。DFS常用于拓扑排序、连通性检测等。',
+    code: DFS_CODE,
     getInitialData: () => SAMPLE_GRAPH,
     Visualizer: GraphVisualizer,
     type: 'graph',
