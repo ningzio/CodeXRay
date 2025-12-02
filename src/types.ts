@@ -23,3 +23,28 @@ export type Algorithm<T> = {
   };
   code: Record<SupportedLanguage, string>; // Map of language to display code with @label comments
 };
+
+// --- Graph Types ---
+export type GraphNode = {
+  id: string;
+  label?: string;
+  x?: number; // For visualization positioning
+  y?: number; // For visualization positioning
+  // Add status for visualization (e.g., visited, exploring)
+  status?: 'unvisited' | 'visiting' | 'visited';
+};
+
+export type GraphEdge = {
+  id: string;
+  source: string; // Node ID
+  target: string; // Node ID
+  weight?: number; // For weighted graphs (e.g., Dijkstra)
+  // Add status for visualization (e.g., traversed)
+  status?: 'default' | 'traversed' | 'active';
+};
+
+export type GraphData = {
+  nodes: GraphNode[];
+  edges: GraphEdge[];
+  directed: boolean; // Is it a directed graph?
+};

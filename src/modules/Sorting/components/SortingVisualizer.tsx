@@ -13,7 +13,7 @@ export const SortingVisualizer: React.FC<SortingVisualizerProps> = ({ step }) =>
   const maxVal = Math.max(...array, 1);
 
   return (
-    <div className="flex items-end justify-center gap-2 h-64 w-full bg-slate-800/50 p-8 rounded-xl border border-slate-700 shadow-inner relative overflow-hidden">
+    <div className="flex items-end justify-center gap-2 h-64 w-full relative overflow-hidden">
       {/* Active Range Indicator Background (Optional enhancement) */}
       {activeRange && (
         <div 
@@ -37,7 +37,7 @@ export const SortingVisualizer: React.FC<SortingVisualizerProps> = ({ step }) =>
           let bgColor = "bg-blue-500"; // Default
           if (isHighlighted) bgColor = "bg-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.6)]";
           else if (isSecondary) bgColor = "bg-green-500";
-          else if (!isActive) bgColor = "bg-slate-600 opacity-40"; // Dim inactive elements
+          else if (!isActive) bgColor = "bg-slate-300 dark:bg-slate-700 opacity-40"; // Dim inactive elements (Adaptive)
 
           return (
             <motion.div
@@ -56,7 +56,7 @@ export const SortingVisualizer: React.FC<SortingVisualizerProps> = ({ step }) =>
               {value}
               {/* Small marker for inactive elements to show they are not in focus */}
               {!isActive && activeRange && (
-                 <span className="absolute -top-6 text-[10px] text-slate-500 font-mono opacity-0 group-hover:opacity-100 transition-opacity">
+                 <span className="absolute -top-6 text-[10px] text-slate-400 dark:text-slate-500 font-mono opacity-0 group-hover:opacity-100 transition-opacity">
                    Inactive
                  </span>
               )}

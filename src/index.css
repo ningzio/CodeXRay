@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-slate-950: #020617;
   --color-slate-900: #0f172a;
@@ -15,4 +17,22 @@ body {
   color: #f8fafc; /* slate-50 */
   font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   -webkit-font-smoothing: antialiased;
+}
+
+@keyframes beam-rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes beam-rotate-reverse {
+  0% { transform: rotate(360deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.animate-beam-rotate {
+  animation: beam-rotate 60s linear infinite;
+}
+
+.animate-beam-rotate-reverse {
+  animation: beam-rotate-reverse 75s linear infinite;
 }

@@ -33,7 +33,7 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({ code, activeLabel }) => 
   return (
     <div 
       ref={scrollContainerRef}
-      className="h-full max-h-[400px] overflow-y-auto bg-slate-900 rounded-lg border border-slate-700 font-mono text-xs sm:text-sm shadow-inner"
+      className="h-full overflow-y-auto font-mono text-xs sm:text-sm"
     >
       <div className="flex flex-col min-h-full">
         {lines.map((line, index) => {
@@ -43,15 +43,25 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({ code, activeLabel }) => 
             <div 
               key={index}
               ref={isActive ? activeLineRef : null}
-              className={`flex px-4 py-1 transition-colors duration-200 ${isActive ? 'bg-blue-500/20 border-l-2 border-blue-400' : 'hover:bg-slate-800/50 border-l-2 border-transparent'}`}
+              className={`flex px-4 py-1 transition-colors duration-200 ${
+                isActive 
+                  ? 'bg-blue-50 dark:bg-blue-500/20 border-l-2 border-blue-500 dark:border-blue-400' 
+                  : 'hover:bg-slate-100 dark:hover:bg-slate-800/50 border-l-2 border-transparent'
+              }`}
             >
               {/* Line Number */}
-              <span className="w-8 text-slate-600 select-none text-right mr-4 flex-shrink-0">
+              <span className={`w-8 select-none text-right mr-4 flex-shrink-0 ${
+                isActive ? 'text-blue-500 dark:text-blue-300' : 'text-slate-400 dark:text-slate-600'
+              }`}>
                 {index + 1}
               </span>
               
               {/* Code Content */}
-              <pre className={`whitespace-pre-wrap font-mono ${isActive ? 'text-blue-100 font-medium' : 'text-slate-400'}`}>
+              <pre className={`whitespace-pre-wrap font-mono ${
+                isActive 
+                  ? 'text-slate-900 dark:text-blue-100 font-bold' 
+                  : 'text-slate-600 dark:text-slate-400'
+              }`}>
                 {line}
               </pre>
             </div>

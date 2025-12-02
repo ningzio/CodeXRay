@@ -1,13 +1,19 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { bubbleSort, BUBBLE_SORT_CODE } from './modules/Sorting/algorithms/bubbleSort';
 import { quickSort, QUICK_SORT_CODE } from './modules/Sorting/algorithms/quickSort';
 import { SortingVisualizer } from './modules/Sorting/components/SortingVisualizer';
+import { bfsAlgorithm, BFS_CODE } from './modules/Graph/algorithms/bfs';
+import { GraphVisualizer } from './modules/Graph/components/GraphVisualizer';
 import { PlayerControls } from './components/ui/PlayerControls';
 import { CodeViewer } from './components/ui/CodeViewer';
+import { Dropdown } from './components/ui/Dropdown'; // Add this import
 import { useAlgorithmPlayer } from './hooks/useAlgorithmPlayer';
-import type { AlgorithmGenerator, SupportedLanguage } from './types';
+import type { AlgorithmGenerator, SupportedLanguage, GraphData, AlgorithmStep } from './types';
+import { useTheme } from './hooks/useTheme';
+import { Header } from './components/layout/Header';
+import { Card } from './components/ui/Card';
 
-// Generate a random array of distinct numbers
+// --- Helper Functions ---
 const generateRandomArray = (length = 10) => {
   const arr = Array.from({ length }, (_, i) => i + 1);
   for (let i = arr.length - 1; i > 0; i--) {
@@ -17,20 +23,71 @@ const generateRandomArray = (length = 10) => {
   return arr;
 };
 
-const ALGORITHMS: Record<string, { name: string; func: AlgorithmGenerator<number[]>; complexity: string; description: string; code: Record<SupportedLanguage, string> }> = {
+const SAMPLE_GRAPH: GraphData = {
+  nodes: [
+    { id: 'A', label: 'A', x: 50, y: 50 },
+    { id: 'B', label: 'B', x: 150, y: 50 },
+    { id: 'C', label: 'C', x: 250, y: 50 },
+    { id: 'D', label: 'D', x: 100, y: 150 },
+    { id: 'E', label: 'E', x: 200, y: 150 },
+    { id: 'F', label: 'F', x: 150, y: 250 },
+  ],
+  edges: [
+    { id: 'AB', source: 'A', target: 'B' },
+    { id: 'AC', source: 'A', target: 'C' },
+    { id: 'BD', source: 'B', target: 'D' },
+    { id: 'CD', source: 'C', target: 'D' },
+    { id: 'DE', source: 'D', target: 'E' },
+    { id: 'EF', source: 'E', target: 'F' },
+  ],
+  directed: false,
+};
+
+// --- Algorithm Configuration ---
+type AlgoConfig<T> = {
+  name: string;
+  func: AlgorithmGenerator<T>;
+  complexity: string;
+  description: string;
+  code: Record<SupportedLanguage, string>;
+  getInitialData: () => T;
+  Visualizer: React.ComponentType<{ step: AlgorithmStep<T> }>;
+  type: 'sorting' | 'graph';
+  startNodeId?: string;
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ALGORITHMS: Record<string, AlgoConfig<any>> = {
   bubble: {
     name: '冒泡排序 (Bubble Sort)',
     func: bubbleSort,
     complexity: 'O(n²)',
-    description: '核心思路：重复地走访过要排序的数列，一次比较两个元素，如果他们的顺序错误就把他们交换过来。走访数列的工作是重复地进行直到没有再需要交换，也就是说该数列已经排序完成。"冒泡"这个名字由来是因为越小的元素会经由交换慢慢"浮"到数列的顶端。',
+    description: '重复地走访过要排序的数列，一次比较两个元素，如果他们的顺序错误就把他们交换过来。走访数列的工作是重复地进行直到没有再需要交换，也就是说该数列已经排序完成。"冒泡"这个名字由来是因为越小的元素会经由交换慢慢"浮"到数列的顶端。',
     code: BUBBLE_SORT_CODE,
+    getInitialData: () => generateRandomArray(12),
+    Visualizer: SortingVisualizer,
+    type: 'sorting',
   },
   quick: {
     name: '快速排序 (Quick Sort)',
     func: quickSort,
     complexity: 'O(n log n)',
-    description: '核心思路：通过一趟排序将要排序的数据分割成独立的两部分，其中一部分的所有数据都比另外一部分的所有数据都要小，然后再按此方法对这两部分数据分别进行快速排序，整个排序过程可以递归进行，以达到整个数据变成有序序列。',
+    description: '通过一趟排序将要排序的数据分割成独立的两部分，其中一部分的所有数据都比另外一部分的所有数据都要小，然后再按此方法对这两部分数据分别进行快速排序，整个排序过程可以递归进行，以达到整个数据变成有序序列。',
     code: QUICK_SORT_CODE,
+    getInitialData: () => generateRandomArray(12),
+    Visualizer: SortingVisualizer,
+    type: 'sorting',
+  },
+  bfs: {
+    name: '广度优先搜索 (BFS)',
+    func: bfsAlgorithm,
+    complexity: 'O(V + E)',
+    description: '从图的某个节点出发，首先访问该节点本身，然后访问其所有未访问的邻居节点，再依次访问这些邻居节点的未访问邻居，以此类推。BFS 总是优先探索离起始节点最近的节点，因此常用于查找最短路径或遍历连通分量。',
+    code: BFS_CODE,
+    getInitialData: () => SAMPLE_GRAPH,
+    Visualizer: GraphVisualizer,
+    type: 'graph',
+    startNodeId: 'A',
   },
 };
 
@@ -40,106 +97,66 @@ const LANGUAGES: Record<SupportedLanguage, string> = {
   go: 'Go',
 };
 
-function App() {
-  // Initial data state
-  const [data, setData] = useState(() => generateRandomArray(12));
-  const [selectedAlgoKey, setSelectedAlgoKey] = useState<string>('bubble');
-  const [language, setLanguage] = useState<SupportedLanguage>('javascript');
+// --- AlgorithmRunner Component ---
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const AlgorithmRunner = ({ config, language }: { config: AlgoConfig<any>, language: SupportedLanguage }) => {
+  const [currentInitialData, setCurrentInitialData] = useState(() => config.getInitialData());
 
-  const selectedAlgo = ALGORITHMS[selectedAlgoKey];
-
-  // Initialize the player hook
   const player = useAlgorithmPlayer({
-    algorithm: selectedAlgo.func,
-    initialData: data,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    algorithm: useCallback((initialData: any) => {
+      if (config.type === 'graph') {
+        return (config.func as AlgorithmGenerator<GraphData>)(initialData, config.startNodeId);
+      } else {
+        return (config.func as AlgorithmGenerator<number[]>)(initialData);
+      }
+    }, [config.func, config.type, config.startNodeId]),
+    initialData: currentInitialData,
     initialSpeed: 300,
   });
 
-  const handleShuffle = () => {
-    const newData = generateRandomArray(12);
-    setData(newData);
-    // The hook will automatically reset when data changes due to its dependency array
+  const handleDataReset = () => {
+    let newData;
+    if (config.type === 'sorting') {
+      newData = generateRandomArray(12);
+    } else if (config.type === 'graph') {
+      newData = JSON.parse(JSON.stringify(config.getInitialData())) as GraphData;
+      newData.nodes.forEach(node => node.status = 'unvisited');
+      newData.edges.forEach(edge => edge.status = 'default');
+    }
+    setCurrentInitialData(newData);
+    player.controls.reset();
   };
 
+  const VisualizerComponent = config.Visualizer;
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-200 flex flex-col items-center py-12 px-4 font-sans">
-      
-      <header className="mb-8 text-center space-y-2">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent tracking-tight">
-          CodeXRay
-        </h1>
-        <p className="text-slate-500 text-sm">算法原理可视化 (Algorithm Mechanics Visualized)</p>
-      </header>
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      {/* Main Stage: 8 columns */}
+      <div className="lg:col-span-8 flex flex-col gap-6">
 
-      <main className="w-full max-w-3xl space-y-6">
-        {/* Top Bar: Algorithm Info & Actions */}
-        <div className="flex flex-col sm:flex-row justify-between items-end sm:items-center gap-4 pb-4 border-b border-slate-800">
-          <div className="flex flex-col gap-1 w-full sm:w-auto">
-            <label className="text-xs text-slate-500 font-medium uppercase tracking-wider">当前算法</label>
-            <select 
-              value={selectedAlgoKey}
-              onChange={(e) => setSelectedAlgoKey(e.target.value)}
-              className="bg-slate-900 border border-slate-700 text-white text-lg font-semibold rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 w-full sm:min-w-[200px]"
+        {/* Visualizer Window */}
+        <Card className="relative overflow-hidden min-h-[400px] flex flex-col p-0">
+          <div className="absolute top-4 right-4 z-10">
+            <button
+              onClick={handleDataReset}
+              className="px-3 py-1.5 bg-white/10 backdrop-blur hover:bg-white/20 text-slate-600 dark:text-slate-300 text-xs font-medium rounded-lg transition-colors border border-white/10"
             >
-              {Object.entries(ALGORITHMS).map(([key, algo]) => (
-                <option key={key} value={key}>
-                  {algo.name}
-                </option>
-              ))}
-            </select>
-            <p className="text-slate-400 text-xs">{selectedAlgo.complexity} 时间复杂度</p>
-          </div>
-
-          <div className="flex items-end gap-4">
-            <div className="flex flex-col gap-1">
-                <label className="text-xs text-slate-500 font-medium uppercase tracking-wider">语言</label>
-                <select 
-                value={language}
-                onChange={(e) => setLanguage(e.target.value as SupportedLanguage)}
-                className="bg-slate-900 border border-slate-700 text-white text-sm font-semibold rounded-lg px-3 py-2.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 min-w-[120px]"
-                >
-                {Object.entries(LANGUAGES).map(([key, label]) => (
-                    <option key={key} value={key}>
-                    {label}
-                    </option>
-                ))}
-                </select>
-            </div>
-
-            <button 
-                onClick={handleShuffle}
-                className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium rounded-lg transition-colors border border-slate-700 whitespace-nowrap"
-            >
-                随机重置数据
+              {config.type === 'sorting' ? '随机重置数据' : '重置图'}
             </button>
           </div>
-        </div>
 
-        {/* Algorithm Description */}
-        <div className="bg-slate-900/50 p-4 rounded-lg border border-slate-800/50 text-sm text-slate-400 leading-relaxed">
-          <p><span className="text-slate-300 font-semibold">算法简介：</span>{selectedAlgo.description}</p>
-        </div>
+          <div className="flex-1 flex items-center justify-center bg-slate-100/50 dark:bg-slate-900/50 relative">
+            {/* Grid Pattern Background */}
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:20px_20px]"></div>
 
-        {/* Code Viewer (now above visualization) */}
-        <div className="h-full min-h-[300px]">
-             <CodeViewer 
-                code={selectedAlgo.code[language]} 
-                activeLabel={player.currentStep.codeLabel} 
-             />
-        </div>
-
-        {/* Visualization Area + Controls (now below code viewer) */}
-        <div className="flex flex-col gap-6">
-             <div className="relative group">
-              <SortingVisualizer step={player.currentStep} />
-              
-              {/* Log Overlay */}
-              <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-md text-xs font-mono text-blue-200 px-3 py-1.5 rounded-full border border-blue-500/20 opacity-80">
-                {player.currentStep.log || "准备就绪"}
-              </div>
+            <div className="relative z-0 w-full px-8">
+              <VisualizerComponent step={player.currentStep} />
             </div>
+          </div>
 
-            {/* Controls */}
+          {/* Player Controls Bar (Floating-like at bottom) */}
+          <div className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4">
             <PlayerControls
               isPlaying={player.isPlaying}
               currentStep={player.currentStepIndex}
@@ -153,7 +170,121 @@ function App() {
               onSpeedChange={player.setSpeed}
             />
           </div>
-      </main>
+        </Card>
+
+        {/* Log Console */}
+        <Card title="执行日志" className="min-h-[100px] font-mono text-sm">
+          <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+            <span className="text-blue-500">➜</span>
+            <span>{player.currentStep.log || "准备就绪"}</span>
+          </div>
+        </Card>
+      </div>
+
+      {/* Sidebar: 4 columns */}
+      <div className="lg:col-span-4 flex flex-col gap-6 h-full">
+        {/* Code X-Ray */}
+        <Card title="代码透视" className="flex-1 min-h-[400px] flex flex-col p-0 overflow-hidden">
+          <CodeViewer
+            code={config.code[language]}
+            activeLabel={player.currentStep.codeLabel}
+          />
+        </Card>
+
+        {/* Algorithm Intel */}
+        <Card title="算法情报" className="min-h-[150px]">
+          <div className="space-y-4">
+            <div>
+              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">时间复杂度</span>
+              <p className="text-xl font-bold text-slate-700 dark:text-slate-200 mt-1 font-mono">{config.complexity}</p>
+            </div>
+            <div>
+              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">核心思路</span>
+              <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
+                {config.description}
+              </p>
+            </div>
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+function App() {
+  const [selectedAlgoKey, setSelectedAlgoKey] = useState<string>('bubble');
+  const [language, setLanguage] = useState<SupportedLanguage>('javascript');
+  const { theme, toggleTheme } = useTheme();
+
+  const selectedAlgo = ALGORITHMS[selectedAlgoKey];
+
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300 font-sans text-slate-900 dark:text-slate-200 selection:bg-blue-500/30 relative">
+        
+                          {/* Background Gradients (X-Ray Beams) */}
+        
+                          <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+        
+                            {/* Primary Beam */}
+        
+                            <div className="absolute -top-[50%] -left-[50%] w-[200%] h-[200%] bg-[conic-gradient(from_0deg,transparent_0deg,transparent_140deg,var(--color-beam)_160deg,transparent_180deg)] opacity-30 dark:opacity-20 animate-beam-rotate [--color-beam:#818cf8] dark:[--color-beam:#a78bfa]"></div>
+        
+                            
+        
+                            {/* Secondary Beam */}
+        
+                            <div className="absolute -top-[50%] -left-[50%] w-[200%] h-[200%] bg-[conic-gradient(from_180deg,transparent_0deg,transparent_140deg,var(--color-beam-2)_160deg,transparent_180deg)] opacity-20 dark:opacity-10 animate-beam-rotate-reverse [--color-beam-2:#22d3ee] dark:[--color-beam-2:#2dd4bf]"></div>
+        
+                            
+        
+                            
+        
+                          </div>        <div className="relative z-10">
+          <Header theme={theme} toggleTheme={toggleTheme} />
+  
+          <main className="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto">
+          {/* Control Bar */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
+          <div className="flex items-center gap-4 w-full sm:w-auto">
+            <div className="relative group">
+              <Dropdown
+                options={Object.entries(ALGORITHMS).map(([key, algo]) => ({
+                  value: key,
+                  label: algo.name,
+                }))}
+                value={selectedAlgoKey}
+                onChange={(value) => setSelectedAlgoKey(value)}
+                placeholder="选择算法"
+                className="min-w-[240px]"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+            {Object.entries(LANGUAGES).map(([key, label]) => (
+              <button
+                key={key}
+                onClick={() => setLanguage(key as SupportedLanguage)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${language === key
+                    ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm'
+                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                  }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <AlgorithmRunner
+          key={selectedAlgoKey}
+          config={selectedAlgo}
+          language={language}
+        />
+
+        </main>
+      </div>
     </div>
   );
 }

@@ -34,6 +34,7 @@ export function useAlgorithmPlayer<T>({
       generatedSteps.push(step);
     }
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSteps(generatedSteps);
     setCurrentStepIndex(0);
     setIsPlaying(false);
