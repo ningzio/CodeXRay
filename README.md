@@ -1,5 +1,7 @@
 # CodeXRay: 算法原理可视化与多语言代码同步解析
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ningzio/CodeXRay)
+
 ## 项目简介
 
 CodeXRay 是一个交互式的算法可视化工具，旨在帮助用户直观地理解排序算法的内部工作原理。它将算法动画、实时日志输出与代码高亮同步展示，并支持多种编程语言的代码切换，让学习者能够以自己熟悉的语言追踪算法的每一步执行。
