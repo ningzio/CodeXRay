@@ -5,9 +5,10 @@
 CodeXRay is an interactive, web-based algorithm visualization platform built with **React**, **TypeScript**, and **Vite**. Its primary goal is to provide an "X-Ray vision" into the mechanics of code, helping users understand algorithms and system internals through animations synchronized with source code.
 
 **Key Features:**
-*   **Algorithm Visualization:** Dynamic animations for sorting algorithms (Bubble Sort, Quick Sort), and now graph algorithms (BFS).
+*   **Algorithm Visualization:** Dynamic animations for sorting algorithms (Bubble Sort, Quick Sort), and now graph algorithms (BFS, DFS, Dijkstra).
 *   **Shadow Code System:** A unique architecture that synchronizes the visualization with source code in multiple languages (**JavaScript**, **Python**, **Go**).
 *   **Recursion Visualization:** Visual cues (dimming) to show active recursion ranges in complex algorithms like Quick Sort.
+*   **Algorithm Intelligence:** A "tactical handbook" approach to algorithm learning, providing structured insights beyond just visualization.
 *   **Internationalization:** Fully localized for Chinese users.
 
 ## Architecture
@@ -38,6 +39,41 @@ To ensure robust state management and type safety when switching between differe
         *   **Unmount** the previous `AlgorithmRunner` instance when `selectedAlgoKey` changes.
         *   **Mount** a brand new `AlgorithmRunner` instance, which will then correctly initialize its internal state (like `currentInitialData` and the `useAlgorithmPlayer` hook) based on the *new* algorithm's configuration.
     *   This pattern guarantees that the `useAlgorithmPlayer` hook (and the generator it runs) always receives an `initialData` that is perfectly matched in type and content to the currently selected algorithm, preventing crashes and ensuring type consistency.
+
+## Algorithm Intelligence (New)
+
+The "Algorithm Intelligence" module is designed as a **Tactical Handbook**. Instead of a simple description, it provides a structured, multi-dimensional view of the algorithm, encouraging a deeper understanding of *why* and *how* to use it.
+
+### Design Philosophy
+*   **Structured Data:** Information is not a blob of text but broken down into specific fields (Tactics, Pitfalls, Complexity).
+*   **Tactical Focus:** Content should be practical ("When to use," "Common mistakes") rather than purely academic.
+*   **Deep Dives:** The platform provides the high-level intuition and tactical advice, but links out to authoritative sources (Wikipedia, VisuAlgo) for mathematical proofs and deep theory.
+
+### Implementation Details (`AlgorithmProfile`)
+When adding a new algorithm, you must populate the `profile` object with the following structure:
+
+```typescript
+type AlgorithmProfile = {
+  complexity: {
+    time: string;       // e.g., "O(n log n)"
+    space: string;      // e.g., "O(log n)"
+    bestCase?: string;  // e.g., "O(n) (Already sorted)"
+    worstCase?: string; // e.g., "O(n²) (Bad Pivot)"
+  };
+  description: string;  // One-sentence high-level summary.
+  howItWorks: string;   // The core idea/tactic (e.g., "Divide and Conquer").
+  scenarios: string[];  // Practical use cases (e.g., "Database indexing").
+  keyConcepts: string[];// Tags for filtering/understanding (e.g., "Recursion").
+  pitfalls?: string[];  // Common implementation mistakes or limitations.
+  links?: { label: string; url: string }[]; // External resources.
+};
+```
+
+### UI Requirement
+The Algorithm Intelligence UI uses a **Tabbed Interface**:
+1.  **Overview (概览):** Shows the definition and a complexity grid.
+2.  **Tactics (战术):** Shows the core mechanism (`howItWorks`), specific scenarios, and pitfalls.
+3.  **Deep Dive (深潜):** Lists external links.
 
 ## UI/UX Design Philosophy
 
@@ -110,20 +146,21 @@ The codebase is organized by **functional modules** rather than file types:
 src/
 ├── components/           # Shared UI components
 │   └── ui/
-│       ├── CodeViewer.tsx    # Renders code with highlighting
+│       ├── AlgorithmIntel.tsx # [New] Tabbed intelligence display
+│       ├── CodeViewer.tsx     # Renders code with highlighting
 │       └── PlayerControls.tsx
 ├── hooks/                # Global hooks
 │   └── useAlgorithmPlayer.ts # Core logic for animation playback
 ├── modules/              # Feature modules
 │   ├── Graph/            # [New] Graph Algorithms module
-│   │   ├── algorithms/       # e.g., bfs.ts
+│   │   ├── algorithms/       # e.g., bfs.ts, dijkstra.ts
 │   │   └── components/       # e.g., GraphVisualizer.tsx
 │   ├── Sorting/
 │   │   ├── algorithms/       # Algorithm generators & code strings
 │   │   └── components/       # Visualization components
 │   └── ...
 ├── utils/                # Helper utilities (e.g., code parser)
-└── types.ts              # Global type definitions (AlgorithmStep, etc.)
+└── types.ts              # Global type definitions (AlgorithmStep, AlgorithmProfile, etc.)
 ```
 
 ## Development Conventions
@@ -131,4 +168,5 @@ src/
 *   **Algorithm Implementation:** All new algorithms must be implemented as Generators.
 *   **Immutability:** Snapshots yielded by generators must contain **copies** of mutable data (e.g., arrays) to ensure time-travel (undo/redo) works correctly.
 *   **Multi-Language Support:** When adding an algorithm, you must provide implementations/strings for all supported languages (JS, Python, Go) and ensure `// @label` tags are consistent.
+*   **Algorithm Intelligence:** When adding a new algorithm, you **must** fully populate its `AlgorithmProfile` (including best/worst case complexity, scenarios, and pitfalls). Use the "Tactical Handbook" style—practical, concise, and educational.
 *   **Algorithm Type Safety**: When adding new algorithm categories (e.g., Graph), ensure the `AlgoConfig` in `App.tsx` correctly defines `getInitialData` and `Visualizer` components for that type. If the data type changes significantly, consider if `AlgorithmRunner` needs further generic typing or if the `key` prop adequately handles the reset.
