@@ -77,10 +77,16 @@ const getAdjacencyList = (graphData: GraphData): Map<string, { id: string; weigh
   return adjList;
 };
 
+// Helper to deep clone graph
+const cloneGraph = (graph: GraphData): GraphData => {
+  return JSON.parse(JSON.stringify(graph));
+};
+
 export const dijkstraAlgorithm: AlgorithmGenerator<GraphData> = function* (initialGraph: GraphData, startNodeId: string = initialGraph.nodes[0]?.id) {
   if (!startNodeId) throw new Error("Dijkstra requires a start node ID.");
 
-  const graph = JSON.parse(JSON.stringify(initialGraph)) as GraphData;
+  // We work on a "current state" graph, but yield copies of it
+  const graph = cloneGraph(initialGraph);
   const adjList = getAdjacencyList(graph);
 
   // 1. Initialize
@@ -96,7 +102,7 @@ export const dijkstraAlgorithm: AlgorithmGenerator<GraphData> = function* (initi
   graph.edges.forEach(edge => edge.status = 'default');
 
   yield {
-    state: graph,
+    state: cloneGraph(graph),
     log: "初始化距离：起点为 0，其他为 ∞。",
     codeLabel: 'initDist'
   };
@@ -107,7 +113,7 @@ export const dijkstraAlgorithm: AlgorithmGenerator<GraphData> = function* (initi
   pq.push({ id: startNodeId, dist: 0 });
 
   yield {
-    state: graph,
+    state: cloneGraph(graph),
     log: `将起点 ${startNodeId} 加入优先队列，距离 0。`,
     codeLabel: 'initPQ',
     highlightIndices: [graph.nodes.findIndex(n => n.id === startNodeId)]
@@ -118,7 +124,7 @@ export const dijkstraAlgorithm: AlgorithmGenerator<GraphData> = function* (initi
     pq.sort((a, b) => a.dist - b.dist);
 
     yield {
-      state: graph,
+      state: cloneGraph(graph),
       log: "检查优先队列...",
       codeLabel: 'loopPQ'
     };
@@ -131,7 +137,7 @@ export const dijkstraAlgorithm: AlgorithmGenerator<GraphData> = function* (initi
     uNode.status = 'visited';
 
     yield {
-      state: graph,
+      state: cloneGraph(graph),
       log: `取出当前距离最小节点 ${uId} (dist: ${uDist})，标记为已确定。`,
       codeLabel: 'dequeue',
       highlightIndices: [graph.nodes.findIndex(n => n.id === uId)]
@@ -141,7 +147,7 @@ export const dijkstraAlgorithm: AlgorithmGenerator<GraphData> = function* (initi
 
     // Highlight edges
     yield {
-      state: graph,
+      state: cloneGraph(graph),
       log: `遍历节点 ${uId} 的所有邻居。`,
       codeLabel: 'loopNeighbors',
       highlightIndices: [graph.nodes.findIndex(n => n.id === uId)]
@@ -160,7 +166,7 @@ export const dijkstraAlgorithm: AlgorithmGenerator<GraphData> = function* (initi
         const alt = uDist + neighbor.weight;
 
         yield {
-            state: graph,
+            state: cloneGraph(graph),
             log: `计算通过 ${uId} 到达 ${neighbor.id} 的距离: ${uDist} + ${neighbor.weight} = ${alt}。`,
             codeLabel: 'calcDist',
             highlightIndices: [graph.nodes.findIndex(n => n.id === neighbor.id)],
@@ -171,7 +177,7 @@ export const dijkstraAlgorithm: AlgorithmGenerator<GraphData> = function* (initi
         const currentNeighborDist = distances.get(neighbor.id)!;
 
         yield {
-            state: graph,
+            state: cloneGraph(graph),
             log: `比较新距离 ${alt} 与当前距离 ${currentNeighborDist === Infinity ? '∞' : currentNeighborDist}。`,
             codeLabel: 'checkDist',
             highlightIndices: [graph.nodes.findIndex(n => n.id === neighbor.id)],
@@ -190,7 +196,7 @@ export const dijkstraAlgorithm: AlgorithmGenerator<GraphData> = function* (initi
             pq.push({ id: neighbor.id, dist: alt });
 
             yield {
-                state: graph,
+                state: cloneGraph(graph),
                 log: `更新 ${neighbor.id} 的最短距离为 ${alt}，并加入优先队列。`,
                 codeLabel: 'updateDist',
                 highlightIndices: [graph.nodes.findIndex(n => n.id === neighbor.id)],
@@ -203,7 +209,7 @@ export const dijkstraAlgorithm: AlgorithmGenerator<GraphData> = function* (initi
   }
 
   yield {
-      state: graph,
+      state: cloneGraph(graph),
       log: "Dijkstra 算法完成！所有节点的最短路径已确定。",
   };
 };
