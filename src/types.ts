@@ -13,15 +13,23 @@ export type AlgorithmGenerator<T> = (initialData: T, ...args: any[]) => Generato
 
 export type SupportedLanguage = 'javascript' | 'python' | 'go';
 
-export type Algorithm<T> = {
-  id: string;
-  label: string;
-  description?: string;
-  run: AlgorithmGenerator<T>;
-  complexity?: {
+export type AlgorithmProfile = {
+  complexity: {
     time: string;
     space: string;
   };
+  description: string; // Short summary
+  howItWorks: string; // More detailed explanation
+  scenarios: string[]; // When to use
+  keyConcepts: string[]; // Key ideas (e.g., "Divide and Conquer")
+  limitations?: string[]; // e.g. "No negative weights"
+};
+
+export type Algorithm<T> = {
+  id: string;
+  label: string;
+  profile: AlgorithmProfile;
+  run: AlgorithmGenerator<T>;
   code: Record<SupportedLanguage, string>; // Map of language to display code with @label comments
 };
 
