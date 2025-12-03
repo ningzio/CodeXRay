@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
+import { Code2, GitGraph } from 'lucide-react';
 import { bubbleSort, BUBBLE_SORT_CODE } from './modules/Sorting/algorithms/bubbleSort';
 import { quickSort, QUICK_SORT_CODE } from './modules/Sorting/algorithms/quickSort';
 import { SortingVisualizer } from './modules/Sorting/components/SortingVisualizer';
@@ -8,7 +9,7 @@ import { dijkstraAlgorithm, DIJKSTRA_CODE } from './modules/Graph/algorithms/dij
 import { GraphVisualizer } from './modules/Graph/components/GraphVisualizer';
 import { PlayerControls } from './components/ui/PlayerControls';
 import { CodeViewer } from './components/ui/CodeViewer';
-import { NavigationMenu, type NavigationGroup } from './components/ui/NavigationMenu';
+import { Sidebar, type SidebarGroup } from './components/layout/Sidebar';
 import { useAlgorithmPlayer } from './hooks/useAlgorithmPlayer';
 import type { AlgorithmGenerator, SupportedLanguage, GraphData, AlgorithmStep, AlgorithmProfile } from './types';
 import { useTheme } from './hooks/useTheme';
@@ -218,7 +219,15 @@ const LANGUAGES: Record<SupportedLanguage, string> = {
 
 // --- AlgorithmRunner Component ---
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const AlgorithmRunner = ({ config, language }: { config: AlgoConfig<any>, language: SupportedLanguage }) => {
+const AlgorithmRunner = ({
+  config,
+  language,
+  onLanguageChange
+}: {
+  config: AlgoConfig<any>,
+  language: SupportedLanguage,
+  onLanguageChange: (lang: SupportedLanguage) => void
+}) => {
   const [currentInitialData, setCurrentInitialData] = useState(() => config.getInitialData());
 
   const player = useAlgorithmPlayer({
@@ -250,7 +259,7 @@ const AlgorithmRunner = ({ config, language }: { config: AlgoConfig<any>, langua
   const VisualizerComponent = config.Visualizer;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full content-start">
       {/* Main Stage: 8 columns */}
       <div className="lg:col-span-8 flex flex-col gap-6">
 
@@ -303,7 +312,26 @@ const AlgorithmRunner = ({ config, language }: { config: AlgoConfig<any>, langua
       {/* Sidebar: 4 columns */}
       <div className="lg:col-span-4 flex flex-col gap-6 h-full">
         {/* Code X-Ray */}
-        <Card title="代码透视" className="flex-1 min-h-[400px] flex flex-col p-0 overflow-hidden">
+        <Card
+          title="代码透视"
+          className="flex-1 min-h-[400px] flex flex-col p-0 overflow-hidden"
+          action={
+            <div className="flex items-center gap-1">
+              {Object.entries(LANGUAGES).map(([key, label]) => (
+                <button
+                  key={key}
+                  onClick={() => onLanguageChange(key as SupportedLanguage)}
+                  className={`px-2 py-1 rounded text-xs font-medium transition-all ${language === key
+                      ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-300'
+                      : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50'
+                    }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          }
+        >
           <CodeViewer
             code={config.code[language]}
             activeLabel={player.currentStep.codeLabel}
@@ -322,12 +350,13 @@ const AlgorithmRunner = ({ config, language }: { config: AlgoConfig<any>, langua
 function App() {
   const [selectedAlgoKey, setSelectedAlgoKey] = useState<string>('bubble');
   const [language, setLanguage] = useState<SupportedLanguage>('javascript');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
   const selectedAlgo = ALGORITHMS[selectedAlgoKey];
 
-  // Group algorithms by type for NavigationMenu
-  const algoGroups = useMemo<NavigationGroup[]>(() => {
+  // Group algorithms by type for Sidebar
+  const algoGroups = useMemo<SidebarGroup[]>(() => {
     const groups: Record<string, { value: string; label: string }[]> = {
       sorting: [],
       graph: [],
@@ -340,73 +369,59 @@ function App() {
     });
 
     return [
-      { label: '排序算法', items: groups.sorting },
-      { label: '图算法', items: groups.graph },
+      { id: 'sorting', label: '排序算法', icon: Code2, items: groups.sorting },
+      { id: 'graph', label: '图算法', icon: GitGraph, items: groups.graph },
     ];
   }, []);
 
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300 font-sans text-slate-900 dark:text-slate-200 selection:bg-blue-500/30 relative">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300 font-sans text-slate-900 dark:text-slate-200 selection:bg-blue-500/30 relative flex flex-col">
         
-                          {/* Background Gradients (X-Ray Beams) */}
-        
-                          <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-        
-                            {/* Primary Beam */}
-        
-                            <div className="absolute -top-[50%] -left-[50%] w-[200%] h-[200%] bg-[conic-gradient(from_0deg,transparent_0deg,transparent_140deg,var(--color-beam)_160deg,transparent_180deg)] opacity-30 dark:opacity-20 animate-beam-rotate [--color-beam:#818cf8] dark:[--color-beam:#a78bfa]"></div>
-        
-                            
-        
-                            {/* Secondary Beam */}
-        
-                            <div className="absolute -top-[50%] -left-[50%] w-[200%] h-[200%] bg-[conic-gradient(from_180deg,transparent_0deg,transparent_140deg,var(--color-beam-2)_160deg,transparent_180deg)] opacity-20 dark:opacity-10 animate-beam-rotate-reverse [--color-beam-2:#22d3ee] dark:[--color-beam-2:#2dd4bf]"></div>
-        
-                            
-        
-                            
-        
-                          </div>        <div className="relative z-10">
-          <Header theme={theme} toggleTheme={toggleTheme} />
-  
-          <main className="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto">
-          {/* Control Bar */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
-          <div className="flex items-center gap-4 w-full sm:w-auto">
-            <NavigationMenu
-              groups={algoGroups}
-              value={selectedAlgoKey}
-              onChange={setSelectedAlgoKey}
-            />
-          </div>
+        {/* Background Gradients (X-Ray Beams) */}
+        <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+          {/* Primary Beam */}
+          <div className="absolute -top-[50%] -left-[50%] w-[200%] h-[200%] bg-[conic-gradient(from_0deg,transparent_0deg,transparent_140deg,var(--color-beam)_160deg,transparent_180deg)] opacity-30 dark:opacity-20 animate-beam-rotate [--color-beam:#818cf8] dark:[--color-beam:#a78bfa]"></div>
 
-          <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-            {Object.entries(LANGUAGES).map(([key, label]) => (
-              <button
-                key={key}
-                onClick={() => setLanguage(key as SupportedLanguage)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${language === key
-                    ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm'
-                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50'
-                  }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+          {/* Secondary Beam */}
+          <div className="absolute -top-[50%] -left-[50%] w-[200%] h-[200%] bg-[conic-gradient(from_180deg,transparent_0deg,transparent_140deg,var(--color-beam-2)_160deg,transparent_180deg)] opacity-20 dark:opacity-10 animate-beam-rotate-reverse [--color-beam-2:#22d3ee] dark:[--color-beam-2:#2dd4bf]"></div>
         </div>
 
-        {/* Main Content */}
-        <AlgorithmRunner
-          key={selectedAlgoKey}
-          config={selectedAlgo}
-          language={language}
-        />
+        {/* Header */}
+        <div className="relative z-50">
+          <Header
+            theme={theme}
+            toggleTheme={toggleTheme}
+            onMenuClick={() => setIsSidebarOpen(true)}
+          />
+        </div>
 
-        </main>
+        <div className="flex flex-1 relative z-10 pt-20 max-w-[1920px] mx-auto w-full">
+           {/* Sidebar */}
+           <Sidebar
+             groups={algoGroups}
+             value={selectedAlgoKey}
+             onChange={setSelectedAlgoKey}
+             isOpen={isSidebarOpen}
+             onClose={() => setIsSidebarOpen(false)}
+           />
+
+           {/* Main Content Area */}
+           <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 overflow-x-hidden">
+             {/* Header Title (Optional, showing current algo name could be nice) */}
+             <div className="mb-6 lg:hidden">
+                <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{selectedAlgo.name}</h1>
+             </div>
+
+             <AlgorithmRunner
+               key={selectedAlgoKey}
+               config={selectedAlgo}
+               language={language}
+               onLanguageChange={setLanguage}
+             />
+           </main>
+        </div>
       </div>
-    </div>
-  );
+    );
 }
 
 export default App;
