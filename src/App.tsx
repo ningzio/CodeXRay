@@ -6,6 +6,8 @@ import { bfsAlgorithm, BFS_CODE } from './modules/Graph/algorithms/bfs';
 import { dfsAlgorithm, DFS_CODE } from './modules/Graph/algorithms/dfs';
 import { dijkstraAlgorithm, DIJKSTRA_CODE } from './modules/Graph/algorithms/dijkstra';
 import { GraphVisualizer } from './modules/Graph/components/GraphVisualizer';
+import { avlAlgorithm, AVL_CODE } from './modules/Tree/algorithms/avl';
+import { TreeVisualizer } from './modules/Tree/components/TreeVisualizer';
 import { PlayerControls } from './components/ui/PlayerControls';
 import { CodeViewer } from './components/ui/CodeViewer';
 import { Dropdown } from './components/ui/Dropdown';
@@ -15,6 +17,7 @@ import { useTheme } from './hooks/useTheme';
 import { Header } from './components/layout/Header';
 import { Card } from './components/ui/Card';
 import { AlgorithmIntel } from './components/ui/AlgorithmIntel';
+import { InteractiveControls } from './components/ui/InteractiveControls';
 
 // --- Helper Functions ---
 const generateRandomArray = (length = 10) => {
@@ -78,6 +81,7 @@ type AlgoConfig<T> = {
   Visualizer: React.ComponentType<{ step: AlgorithmStep<T> }>;
   type: 'sorting' | 'graph';
   startNodeId?: string;
+  interactive?: boolean;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -208,6 +212,32 @@ const ALGORITHMS: Record<string, AlgoConfig<any>> = {
     type: 'graph',
     startNodeId: 'A',
   },
+  avl: {
+    name: '平衡二叉树 (AVL Tree)',
+    func: avlAlgorithm,
+    profile: {
+      complexity: {
+        time: 'O(log n)',
+        space: 'O(n)',
+        bestCase: 'O(1) (Hash-like)',
+        worstCase: 'O(log n)'
+      },
+      description: '一种自平衡二叉搜索树，保证任何节点的左右子树高度差不超过1。',
+      howItWorks: '在插入或删除节点后，计算每个节点的平衡因子。如果平衡因子绝对值大于1，通过旋转（LL, RR, LR, RL）来恢复平衡。',
+      keyConcepts: ['二叉搜索树', '平衡因子', '左旋/右旋', '自平衡'],
+      scenarios: ['需要频繁查找且数据变动不频繁的场景', '数据库索引', '集合(Set)和映射(Map)的底层实现'],
+      pitfalls: ['实现复杂，旋转逻辑容易出错', '插入删除开销比红黑树大（维护严格平衡）', '额外存储高度信息'],
+      links: [
+        { label: 'Wikipedia', url: 'https://en.wikipedia.org/wiki/AVL_tree' },
+        { label: 'Visualgo', url: 'https://visualgo.net/en/bst' }
+      ]
+    },
+    code: AVL_CODE,
+    getInitialData: () => ({ nodes: [], edges: [], directed: true }), // Initial empty tree
+    Visualizer: TreeVisualizer,
+    type: 'graph', // It renders as a graph
+    interactive: true,
+  },
 };
 
 const LANGUAGES: Record<SupportedLanguage, string> = {
@@ -220,18 +250,25 @@ const LANGUAGES: Record<SupportedLanguage, string> = {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const AlgorithmRunner = ({ config, language }: { config: AlgoConfig<any>, language: SupportedLanguage }) => {
   const [currentInitialData, setCurrentInitialData] = useState(() => config.getInitialData());
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [interactiveOp, setInteractiveOp] = useState<{ type: string, value: any } | null>(null);
 
   const player = useAlgorithmPlayer({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     algorithm: useCallback((initialData: any) => {
+      if (config.interactive && interactiveOp) {
+         // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         return (config.func as any)(initialData, interactiveOp);
+      }
       if (config.type === 'graph') {
         return (config.func as AlgorithmGenerator<GraphData>)(initialData, config.startNodeId);
       } else {
         return (config.func as AlgorithmGenerator<number[]>)(initialData);
       }
-    }, [config.func, config.type, config.startNodeId]),
+    }, [config.func, config.type, config.startNodeId, config.interactive, interactiveOp]),
     initialData: currentInitialData,
     initialSpeed: 300,
+    autoPlay: !!interactiveOp, // Auto-play when interactive operation is triggered
   });
 
   const handleDataReset = () => {
@@ -244,7 +281,22 @@ const AlgorithmRunner = ({ config, language }: { config: AlgoConfig<any>, langua
       newData.edges.forEach(edge => edge.status = 'default');
     }
     setCurrentInitialData(newData);
+    setInteractiveOp(null); // Reset any pending op
     player.controls.reset();
+  };
+
+  const handleInteractiveRun = (type: string, value: number) => {
+      // 1. Capture current state as the new initial state
+      // We use the state from the *last step* of the previous run (or current step)
+      // Actually, we should use the state from the *current step* being displayed if we want to branch off?
+      // Typically we want to continue from where we are.
+      const currentState = player.currentStep.state;
+      setCurrentInitialData(currentState);
+
+      // 2. Set the operation to trigger the new run
+      setInteractiveOp({ type, value });
+
+      // The useEffect in useAlgorithmPlayer will trigger when initialData or algorithm changes
   };
 
   const VisualizerComponent = config.Visualizer;
@@ -256,7 +308,10 @@ const AlgorithmRunner = ({ config, language }: { config: AlgoConfig<any>, langua
 
         {/* Visualizer Window */}
         <Card className="relative overflow-hidden min-h-[400px] flex flex-col p-0">
-          <div className="absolute top-4 right-4 z-10">
+          <div className="absolute top-4 right-4 z-10 flex gap-2">
+            {config.interactive && (
+               <InteractiveControls onRun={handleInteractiveRun} />
+            )}
             <button
               onClick={handleDataReset}
               className="px-3 py-1.5 bg-white/10 backdrop-blur hover:bg-white/20 text-slate-600 dark:text-slate-300 text-xs font-medium rounded-lg transition-colors border border-white/10"
