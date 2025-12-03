@@ -2,19 +2,18 @@ import React, { useMemo, useEffect } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus, prism } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { parseCodeWithLabels } from '../../utils/codeParser';
-import { useTheme } from '../../hooks/useTheme';
 import type { SupportedLanguage } from '../../types';
 
 type CodeViewerProps = {
   code: string;
   activeLabel?: string;
   language?: SupportedLanguage;
+  theme: 'light' | 'dark';
 };
 
-export const CodeViewer: React.FC<CodeViewerProps> = ({ code, activeLabel, language = 'javascript' }) => {
+export const CodeViewer: React.FC<CodeViewerProps> = ({ code, activeLabel, language = 'javascript', theme }) => {
   const { cleanCode, labelMap } = useMemo(() => parseCodeWithLabels(code), [code]);
   const activeLineIndex = activeLabel ? labelMap[activeLabel] : -1;
-  const { theme } = useTheme();
 
   // Determine style based on theme
   const syntaxStyle = theme === 'dark' ? vscDarkPlus : prism;
