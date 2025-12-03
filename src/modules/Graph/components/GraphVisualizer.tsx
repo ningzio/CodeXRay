@@ -57,21 +57,37 @@ export const GraphVisualizer: React.FC<GraphVisualizerProps> = ({ step }) => {
 
           if (!sourceNode || !targetNode) return null;
 
+          const midX = ((sourceNode.x ?? 0) + (targetNode.x ?? 0)) / 2;
+          const midY = ((sourceNode.y ?? 0) + (targetNode.y ?? 0)) / 2;
+
           let edgeColorClass = EDGE_COLORS.default;
           if (edge.status === 'traversed') edgeColorClass = EDGE_COLORS.traversed;
           else if (edge.status === 'active') edgeColorClass = EDGE_COLORS.active;
 
           return (
-            <line
-              key={edge.id}
-              x1={sourceNode.x}
-              y1={sourceNode.y}
-              x2={targetNode.x}
-              y2={targetNode.y}
-              className={`${edgeColorClass} transition-colors duration-300`}
-              strokeWidth={edge.id === highlightedEdgeId ? 4 : 2}
-              markerEnd={graph.directed ? "url(#arrowhead)" : ""}
-            />
+            <g key={edge.id}>
+              <line
+                x1={sourceNode.x}
+                y1={sourceNode.y}
+                x2={targetNode.x}
+                y2={targetNode.y}
+                className={`${edgeColorClass} transition-colors duration-300`}
+                strokeWidth={edge.id === highlightedEdgeId ? 4 : 2}
+                markerEnd={graph.directed ? "url(#arrowhead)" : ""}
+              />
+              {edge.weight !== undefined && (
+                 <text
+                   x={midX}
+                   y={midY}
+                   className="fill-slate-500 dark:fill-slate-400 text-xs font-bold stroke-white dark:stroke-slate-950 stroke-2"
+                   style={{ paintOrder: 'stroke' }}
+                   textAnchor="middle"
+                   dy="-5" // Shift slightly up
+                 >
+                   {edge.weight}
+                 </text>
+              )}
+            </g>
           );
         })}
 
