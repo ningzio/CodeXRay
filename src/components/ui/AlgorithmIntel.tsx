@@ -36,7 +36,7 @@ export const AlgorithmIntel: React.FC<AlgorithmIntelProps> = ({ profile }) => {
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-y-auto space-y-4 pr-1 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
+      <div className="flex-1 space-y-4 pr-1">
 
         {/* OVERVIEW TAB */}
         {activeTab === 'overview' && (

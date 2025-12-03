@@ -260,7 +260,7 @@ const AlgorithmRunner = ({
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-full content-start">
-      {/* Main Stage: 8 columns */}
+      {/* Main Stage (Left): 8 columns */}
       <div className="lg:col-span-8 flex flex-col gap-6 lg:h-full lg:overflow-y-auto lg:pr-1 lg:pb-4 lg:scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
 
         {/* Visualizer Window */}
@@ -300,21 +300,18 @@ const AlgorithmRunner = ({
           </div>
         </Card>
 
-        {/* Log Console */}
-        <Card title="执行日志" className="min-h-[100px] flex-none font-mono text-sm">
-          <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-            <span className="text-blue-500">➜</span>
-            <span>{player.currentStep.log || "准备就绪"}</span>
-          </div>
+        {/* Algorithm Intel (Moved here) */}
+        <Card title="算法情报" className="min-h-[300px] flex flex-col overflow-visible">
+          <AlgorithmIntel profile={config.profile} />
         </Card>
       </div>
 
-      {/* Sidebar: 4 columns */}
-      <div className="lg:col-span-4 flex flex-col gap-6 lg:h-full overflow-hidden">
+      {/* Sidebar (Right): 4 columns */}
+      <div className="lg:col-span-4 flex flex-col gap-6 lg:h-full lg:overflow-y-auto lg:pr-1 lg:pb-4 lg:scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
         {/* Code X-Ray */}
         <Card
           title="代码透视"
-          className="lg:flex-[55%] min-h-[500px] lg:min-h-0 flex flex-col p-0 overflow-hidden"
+          className="min-h-[200px] flex flex-col p-0 overflow-visible"
           action={
             <div className="flex items-center gap-1">
               {Object.entries(LANGUAGES).map(([key, label]) => (
@@ -338,9 +335,12 @@ const AlgorithmRunner = ({
           />
         </Card>
 
-        {/* Algorithm Intel */}
-        <Card title="算法情报" className="lg:flex-[45%] min-h-[300px] flex flex-col overflow-hidden">
-          <AlgorithmIntel profile={config.profile} />
+        {/* Log Console (Moved here) */}
+        <Card title="执行日志" className="min-h-[100px] flex-none font-mono text-sm">
+          <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+            <span className="text-blue-500">➜</span>
+            <span>{player.currentStep.log || "准备就绪"}</span>
+          </div>
         </Card>
       </div>
     </div>
