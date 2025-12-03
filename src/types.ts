@@ -9,6 +9,7 @@ export type AlgorithmStep<T> = {
 };
 
 // The generator function signature now accepts additional optional arguments
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AlgorithmGenerator<T> = (initialData: T, ...args: any[]) => Generator<AlgorithmStep<T>, void, unknown>;
 
 export type SupportedLanguage = 'javascript' | 'python' | 'go';

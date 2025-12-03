@@ -22,7 +22,7 @@ export const AlgorithmIntel: React.FC<AlgorithmIntelProps> = ({ profile }) => {
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
+            onClick={() => setActiveTab(tab.id as 'overview' | 'tactics' | 'deepdive')}
             className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md text-xs font-medium transition-all ${
               activeTab === tab.id
                 ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-sm'
