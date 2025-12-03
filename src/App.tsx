@@ -248,7 +248,7 @@ const LANGUAGES: Record<SupportedLanguage, string> = {
 
 // --- AlgorithmRunner Component ---
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const AlgorithmRunner = ({ config, language }: { config: AlgoConfig<any>, language: SupportedLanguage }) => {
+const AlgorithmRunner = ({ config, language, theme }: { config: AlgoConfig<any>, language: SupportedLanguage, theme: 'light' | 'dark' }) => {
   const [currentInitialData, setCurrentInitialData] = useState(() => config.getInitialData());
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [interactiveOp, setInteractiveOp] = useState<{ type: string, value: any } | null>(null);
@@ -372,6 +372,8 @@ const AlgorithmRunner = ({ config, language }: { config: AlgoConfig<any>, langua
           <CodeViewer
             code={config.code[language]}
             activeLabel={player.currentStep.codeLabel}
+            language={language}
+            theme={theme}
           />
         </Card>
 
@@ -454,6 +456,7 @@ function App() {
           key={selectedAlgoKey}
           config={selectedAlgo}
           language={language}
+          theme={theme}
         />
 
         </main>
