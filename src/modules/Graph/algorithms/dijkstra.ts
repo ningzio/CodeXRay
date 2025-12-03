@@ -91,6 +91,8 @@ export const dijkstraAlgorithm: AlgorithmGenerator<GraphData> = function* (initi
 
   // 1. Initialize
   const distances = new Map<string, number>();
+  // Track the edge that led to a node's current shortest path: nodeID -> edgeID
+  const predecessorEdges = new Map<string, string>();
   const pq: { id: string, dist: number }[] = [];
   const visited = new Set<string>();
 
@@ -191,7 +193,17 @@ export const dijkstraAlgorithm: AlgorithmGenerator<GraphData> = function* (initi
             neighborNode.label = `${neighbor.id} (${alt})`;
             neighborNode.status = 'visiting'; // Temporary status showing it's "active/reachable"
 
-            if (connectingEdge) connectingEdge.status = 'traversed'; // Mark edge as part of the shortest path tree candidate
+            // If we found a shorter path, we need to unmark the previous "best edge"
+            const previousEdgeId = predecessorEdges.get(neighbor.id);
+            if (previousEdgeId) {
+                const prevEdge = graph.edges.find(e => e.id === previousEdgeId);
+                if (prevEdge) prevEdge.status = 'default';
+            }
+
+            if (connectingEdge) {
+                connectingEdge.status = 'traversed'; // Mark edge as part of the shortest path tree candidate
+                predecessorEdges.set(neighbor.id, connectingEdge.id);
+            }
 
             pq.push({ id: neighbor.id, dist: alt });
 
