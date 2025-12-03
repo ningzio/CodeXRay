@@ -111,7 +111,15 @@ const LANGUAGES: Record<SupportedLanguage, string> = {
 
 // --- AlgorithmRunner Component ---
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const AlgorithmRunner = ({ config, language }: { config: AlgoConfig<any>, language: SupportedLanguage }) => {
+const AlgorithmRunner = ({
+  config,
+  language,
+  onLanguageChange
+}: {
+  config: AlgoConfig<any>,
+  language: SupportedLanguage,
+  onLanguageChange: (lang: SupportedLanguage) => void
+}) => {
   const [currentInitialData, setCurrentInitialData] = useState(() => config.getInitialData());
 
   const player = useAlgorithmPlayer({
@@ -200,7 +208,22 @@ const AlgorithmRunner = ({ config, language }: { config: AlgoConfig<any>, langua
       <div className="contents lg:flex lg:flex-col lg:col-span-4 lg:gap-6 lg:h-full">
         {/* Code X-Ray */}
         <div className="order-2 lg:order-none flex-1 flex flex-col">
-          <Card title="代码透视" className="flex-1 min-h-[400px] flex flex-col p-0 overflow-hidden">
+          <Card
+            title="代码透视"
+            className="flex-1 min-h-[400px] flex flex-col p-0 overflow-hidden"
+            action={
+              <Dropdown
+                options={Object.entries(LANGUAGES).map(([key, label]) => ({
+                  value: key,
+                  label: label,
+                }))}
+                value={language}
+                onChange={(value) => onLanguageChange(value as SupportedLanguage)}
+                placeholder="Language"
+                className="min-w-[120px]"
+              />
+            }
+          >
             <CodeViewer
               code={config.code[language]}
               activeLabel={player.currentStep.codeLabel}
@@ -279,35 +302,6 @@ function App() {
             </div>
           </div>
 
-          {/* Language Selector: Desktop Buttons */}
-          <div className="hidden lg:flex items-center gap-2 bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-            {Object.entries(LANGUAGES).map(([key, label]) => (
-              <button
-                key={key}
-                onClick={() => setLanguage(key as SupportedLanguage)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${language === key
-                    ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm'
-                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50'
-                  }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-
-          {/* Language Selector: Mobile Dropdown */}
-          <div className="block lg:hidden w-full sm:w-auto">
-            <Dropdown
-              options={Object.entries(LANGUAGES).map(([key, label]) => ({
-                value: key,
-                label: label,
-              }))}
-              value={language}
-              onChange={(value) => setLanguage(value as SupportedLanguage)}
-              placeholder="选择语言"
-              className="min-w-[140px]"
-            />
-          </div>
         </div>
 
         {/* Main Content */}
@@ -315,6 +309,7 @@ function App() {
           key={selectedAlgoKey}
           config={selectedAlgo}
           language={language}
+          onLanguageChange={setLanguage}
         />
 
         </main>
