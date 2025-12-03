@@ -372,6 +372,7 @@ const AlgorithmRunner = ({ config, language }: { config: AlgoConfig<any>, langua
           <CodeViewer
             code={config.code[language]}
             activeLabel={player.currentStep.codeLabel}
+            language={language}
           />
         </Card>
 

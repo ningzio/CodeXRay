@@ -1,73 +1,83 @@
-import React, { useMemo, useEffect, useRef } from 'react';
+import React, { useMemo, useEffect } from 'react';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus, prism } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { parseCodeWithLabels } from '../../utils/codeParser';
+import { useTheme } from '../../hooks/useTheme';
+import type { SupportedLanguage } from '../../types';
 
 type CodeViewerProps = {
   code: string;
   activeLabel?: string;
+  language?: SupportedLanguage;
 };
 
-export const CodeViewer: React.FC<CodeViewerProps> = ({ code, activeLabel }) => {
+export const CodeViewer: React.FC<CodeViewerProps> = ({ code, activeLabel, language = 'javascript' }) => {
   const { cleanCode, labelMap } = useMemo(() => parseCodeWithLabels(code), [code]);
   const activeLineIndex = activeLabel ? labelMap[activeLabel] : -1;
-  
-  const lines = cleanCode.split('\n');
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const activeLineRef = useRef<HTMLDivElement>(null);
+  const { theme } = useTheme();
+
+  // Determine style based on theme
+  const syntaxStyle = theme === 'dark' ? vscDarkPlus : prism;
 
   // Auto-scroll to active line
   useEffect(() => {
-    if (activeLineIndex !== -1 && activeLineRef.current && scrollContainerRef.current) {
-      const container = scrollContainerRef.current;
-      const element = activeLineRef.current;
-      
-      const containerRect = container.getBoundingClientRect();
-      const elementRect = element.getBoundingClientRect();
-      
-      // If element is out of view, scroll to it
-      if (elementRect.top < containerRect.top || elementRect.bottom > containerRect.bottom) {
-         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
+    if (activeLineIndex !== -1) {
+      // We use a timeout to ensure the DOM has updated if the code changed
+      const timer = setTimeout(() => {
+        const element = document.getElementById(`code-line-${activeLineIndex}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 0);
+      return () => clearTimeout(timer);
     }
-  }, [activeLineIndex]);
+  }, [activeLineIndex, code]); // Re-run if active line or code changes
 
   return (
-    <div 
-      ref={scrollContainerRef}
-      className="h-full overflow-y-auto font-mono text-xs sm:text-sm"
-    >
-      <div className="flex flex-col min-h-full">
-        {lines.map((line, index) => {
+    <div className="h-full overflow-y-auto font-mono text-xs sm:text-sm">
+      <SyntaxHighlighter
+        key={`${theme}-${language}`}
+        language={language}
+        style={syntaxStyle}
+        showLineNumbers={true}
+        wrapLines={true}
+        customStyle={{
+          margin: 0,
+          padding: 0,
+          background: 'transparent', // Let parent handle background
+          fontSize: 'inherit',
+          lineHeight: '1.5',
+        }}
+        lineNumberStyle={(lineNumber) => {
+          const index = lineNumber - 1;
           const isActive = index === activeLineIndex;
-          
-          return (
-            <div 
-              key={index}
-              ref={isActive ? activeLineRef : null}
-              className={`flex px-4 py-1 transition-colors duration-200 ${
-                isActive 
-                  ? 'bg-blue-50 dark:bg-blue-500/20 border-l-2 border-blue-500 dark:border-blue-400' 
-                  : 'hover:bg-slate-100 dark:hover:bg-slate-800/50 border-l-2 border-transparent'
-              }`}
-            >
-              {/* Line Number */}
-              <span className={`w-8 select-none text-right mr-4 flex-shrink-0 ${
-                isActive ? 'text-blue-500 dark:text-blue-300' : 'text-slate-400 dark:text-slate-600'
-              }`}>
-                {index + 1}
-              </span>
-              
-              {/* Code Content */}
-              <pre className={`whitespace-pre-wrap font-mono ${
-                isActive 
-                  ? 'text-slate-900 dark:text-blue-100 font-bold' 
-                  : 'text-slate-600 dark:text-slate-400'
-              }`}>
-                {line}
-              </pre>
-            </div>
-          );
-        })}
-      </div>
+          return {
+            minWidth: '2.5rem',
+            paddingRight: '1rem',
+            textAlign: 'right',
+            userSelect: 'none',
+            // Colors matching Tailwind slate-400/600 and blue-500/300
+            color: isActive
+              ? (theme === 'dark' ? '#93c5fd' : '#3b82f6')
+              : (theme === 'dark' ? '#475569' : '#94a3b8'),
+          };
+        }}
+        lineProps={(lineNumber) => {
+          const index = lineNumber - 1;
+          const isActive = index === activeLineIndex;
+          return {
+            id: `code-line-${index}`,
+            style: { display: 'block' },
+            className: `px-4 py-0.5 transition-colors duration-200 border-l-2 ${
+              isActive
+                ? 'bg-blue-50 dark:bg-blue-500/20 border-blue-500 dark:border-blue-400'
+                : 'border-transparent hover:bg-slate-100 dark:hover:bg-slate-800/50'
+            }`
+          };
+        }}
+      >
+        {cleanCode}
+      </SyntaxHighlighter>
     </div>
   );
 };
