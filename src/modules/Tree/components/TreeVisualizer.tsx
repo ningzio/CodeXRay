@@ -6,6 +6,7 @@ interface TreeVisualizerProps {
 }
 
 const NODE_RADIUS = 22;
+const CHAR_WIDTH = 8; // Approximate width for mono font
 const NODE_COLORS = {
   unvisited: 'fill-slate-200 dark:fill-slate-700',
   visiting: 'fill-yellow-400 dark:fill-yellow-500',
@@ -66,24 +67,61 @@ export const TreeVisualizer: React.FC<TreeVisualizerProps> = ({ step }) => {
           // Highlight overrides status color
           if (node.id === highlightedNodeId) nodeColorClass = NODE_COLORS.highlighted;
 
-          return (
-            <g key={node.id} transform={`translate(${node.x || 0}, ${node.y || 0})`} className="transition-all duration-500 ease-in-out">
-              <circle
-                r={NODE_RADIUS}
-                className={`${nodeColorClass} transition-colors duration-300 shadow-md`}
-                stroke="currentColor"
-                strokeWidth="2"
-              />
+          const label = node.label || node.id;
+
+          // Check for AVL style label: "Value (H:Height)"
+          const avlMatch = label.match(/^(.*)\s+\((H:\d+)\)$/);
+
+          let content;
+          let rx = NODE_RADIUS;
+
+          if (avlMatch) {
+            const [_, val, heightInfo] = avlMatch;
+
+            // Calculate width needed
+            const valWidth = val.length * CHAR_WIDTH;
+            const heightWidth = heightInfo.length * (CHAR_WIDTH * 0.85); // smaller font
+            const maxContentWidth = Math.max(valWidth, heightWidth);
+            rx = Math.max(NODE_RADIUS, maxContentWidth / 2 + 8);
+
+            content = (
+              <text
+                x="0"
+                y="0"
+                textAnchor="middle"
+                className="fill-slate-600 dark:fill-slate-200 text-xs font-bold pointer-events-none select-none font-mono"
+              >
+                <tspan x="0" dy="-0.2em">{val}</tspan>
+                <tspan x="0" dy="1.3em" fontSize="0.85em" className="opacity-80">{heightInfo}</tspan>
+              </text>
+            );
+          } else {
+            // Standard label
+            const textWidth = label.length * CHAR_WIDTH;
+            rx = Math.max(NODE_RADIUS, textWidth / 2 + 8);
+
+            content = (
               <text
                 x="0"
                 y="5"
                 textAnchor="middle"
                 className="fill-slate-600 dark:fill-slate-200 text-xs font-bold pointer-events-none select-none font-mono"
               >
-                {node.label || node.id}
+                {label}
               </text>
-              {/* Optional: We could render extra info below the node if we extended the type,
-                  but for now we stick to the standard GraphNode */}
+            );
+          }
+
+          return (
+            <g key={node.id} transform={`translate(${node.x || 0}, ${node.y || 0})`} className="transition-all duration-500 ease-in-out">
+              <ellipse
+                rx={rx}
+                ry={NODE_RADIUS}
+                className={`${nodeColorClass} transition-colors duration-300 shadow-md`}
+                stroke="currentColor"
+                strokeWidth="2"
+              />
+              {content}
             </g>
           );
         })}
