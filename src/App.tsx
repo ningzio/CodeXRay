@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
-import { Code2, GitGraph } from 'lucide-react';
+import { Code2, GitGraph, Network } from 'lucide-react';
 import { bubbleSort, BUBBLE_SORT_CODE } from './modules/Sorting/algorithms/bubbleSort';
 import { quickSort, QUICK_SORT_CODE } from './modules/Sorting/algorithms/quickSort';
 import { SortingVisualizer } from './modules/Sorting/components/SortingVisualizer';
@@ -12,7 +12,6 @@ import { TreeVisualizer } from './modules/Tree/components/TreeVisualizer';
 import { PlayerControls } from './components/ui/PlayerControls';
 import { CodeViewer } from './components/ui/CodeViewer';
 import { Sidebar, type SidebarGroup } from './components/layout/Sidebar';
-import { Dropdown } from './components/ui/Dropdown';
 import { useAlgorithmPlayer } from './hooks/useAlgorithmPlayer';
 import type { AlgorithmGenerator, SupportedLanguage, GraphData, AlgorithmStep, AlgorithmProfile } from './types';
 import { useTheme } from './hooks/useTheme';
@@ -81,7 +80,7 @@ type AlgoConfig<T> = {
   code: Record<SupportedLanguage, string>;
   getInitialData: () => T;
   Visualizer: React.ComponentType<{ step: AlgorithmStep<T> }>;
-  type: 'sorting' | 'graph';
+  type: 'sorting' | 'graph' | 'tree';
   startNodeId?: string;
   interactive?: boolean;
 };
@@ -238,7 +237,7 @@ const ALGORITHMS: Record<string, AlgoConfig<any>> = {
     code: AVL_CODE,
     getInitialData: () => generateRandomAVLTree(12),
     Visualizer: TreeVisualizer,
-    type: 'graph', // It renders as a graph
+    type: 'tree',
     interactive: true,
   },
 };
@@ -263,7 +262,7 @@ const AlgorithmRunner = ({ config, language, onLanguageChange, theme }: { config
          // eslint-disable-next-line @typescript-eslint/no-explicit-any
          return (config.func as any)(initialData, interactiveOp);
       }
-      if (config.type === 'graph') {
+      if (config.type === 'graph' || config.type === 'tree') {
         return (config.func as AlgorithmGenerator<GraphData>)(initialData, config.startNodeId);
       } else {
         return (config.func as AlgorithmGenerator<number[]>)(initialData);
@@ -278,7 +277,7 @@ const AlgorithmRunner = ({ config, language, onLanguageChange, theme }: { config
     let newData;
     if (config.type === 'sorting') {
       newData = generateRandomArray(12);
-    } else if (config.type === 'graph') {
+    } else if (config.type === 'graph' || config.type === 'tree') {
       newData = JSON.parse(JSON.stringify(config.getInitialData())) as GraphData;
       newData.nodes.forEach(node => node.status = 'unvisited');
       newData.edges.forEach(edge => edge.status = 'default');
@@ -409,6 +408,7 @@ function App() {
     const groups: Record<string, { value: string; label: string }[]> = {
       sorting: [],
       graph: [],
+      tree: [],
     };
 
     Object.entries(ALGORITHMS).forEach(([key, algo]) => {
@@ -420,6 +420,7 @@ function App() {
     return [
       { id: 'sorting', label: '排序算法', icon: Code2, items: groups.sorting },
       { id: 'graph', label: '图算法', icon: GitGraph, items: groups.graph },
+      { id: 'tree', label: '树算法', icon: Network, items: groups.tree },
     ];
   }, []);
 

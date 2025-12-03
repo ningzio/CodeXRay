@@ -76,7 +76,7 @@ export const TreeVisualizer: React.FC<TreeVisualizerProps> = ({ step }) => {
           let rx = NODE_RADIUS;
 
           if (avlMatch) {
-            const [_, val, heightInfo] = avlMatch;
+            const [, val, heightInfo] = avlMatch;
 
             // Calculate width needed
             const valWidth = val.length * CHAR_WIDTH;

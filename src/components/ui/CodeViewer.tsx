@@ -47,7 +47,7 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({ code, activeLabel, langu
           fontSize: 'inherit',
           lineHeight: '1.5',
         }}
-        lineNumberStyle={(lineNumber) => {
+        lineNumberStyle={(lineNumber: number) => {
           const index = lineNumber - 1;
           const isActive = index === activeLineIndex;
           return {
@@ -61,7 +61,7 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({ code, activeLabel, langu
               : (theme === 'dark' ? '#475569' : '#94a3b8'),
           };
         }}
-        lineProps={(lineNumber) => {
+        lineProps={(lineNumber: number) => {
           const index = lineNumber - 1;
           const isActive = index === activeLineIndex;
           return {
