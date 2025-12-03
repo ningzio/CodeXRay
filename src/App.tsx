@@ -8,7 +8,7 @@ import { dijkstraAlgorithm, DIJKSTRA_CODE } from './modules/Graph/algorithms/dij
 import { GraphVisualizer } from './modules/Graph/components/GraphVisualizer';
 import { PlayerControls } from './components/ui/PlayerControls';
 import { CodeViewer } from './components/ui/CodeViewer';
-import { Dropdown } from './components/ui/Dropdown'; // Add this import
+import { Dropdown } from './components/ui/Dropdown';
 import { useAlgorithmPlayer } from './hooks/useAlgorithmPlayer';
 import type { AlgorithmGenerator, SupportedLanguage, GraphData, AlgorithmStep, AlgorithmProfile } from './types';
 import { useTheme } from './hooks/useTheme';

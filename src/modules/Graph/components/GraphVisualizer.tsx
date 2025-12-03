@@ -79,7 +79,8 @@ export const GraphVisualizer: React.FC<GraphVisualizerProps> = ({ step }) => {
                  <text
                    x={midX}
                    y={midY}
-                   className="fill-slate-500 dark:fill-slate-400 text-xs font-bold bg-white dark:bg-slate-900"
+                   className="fill-slate-500 dark:fill-slate-400 text-xs font-bold stroke-white dark:stroke-slate-950 stroke-2"
+                   style={{ paintOrder: 'stroke' }}
                    textAnchor="middle"
                    dy="-5" // Shift slightly up
                  >
