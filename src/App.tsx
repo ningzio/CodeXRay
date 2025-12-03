@@ -12,6 +12,7 @@ import { TreeVisualizer } from './modules/Tree/components/TreeVisualizer';
 import { PlayerControls } from './components/ui/PlayerControls';
 import { CodeViewer } from './components/ui/CodeViewer';
 import { Sidebar, type SidebarGroup } from './components/layout/Sidebar';
+import { Dropdown } from './components/ui/Dropdown';
 import { useAlgorithmPlayer } from './hooks/useAlgorithmPlayer';
 import type { AlgorithmGenerator, SupportedLanguage, GraphData, AlgorithmStep, AlgorithmProfile } from './types';
 import { useTheme } from './hooks/useTheme';
