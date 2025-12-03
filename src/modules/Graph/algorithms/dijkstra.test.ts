@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { dijkstraAlgorithm } from './dijkstra';
-import { GraphData } from '../../../types';
+import type { GraphData } from '../../../types';
 
 describe('Dijkstra Algorithm Visualization', () => {
   it('should not have multiple traversed edges for a single node', () => {
