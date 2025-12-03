@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
+import { Code2, GitGraph } from 'lucide-react';
 import { bubbleSort, BUBBLE_SORT_CODE } from './modules/Sorting/algorithms/bubbleSort';
 import { quickSort, QUICK_SORT_CODE } from './modules/Sorting/algorithms/quickSort';
 import { SortingVisualizer } from './modules/Sorting/components/SortingVisualizer';
@@ -10,6 +11,7 @@ import { avlAlgorithm, AVL_CODE, generateRandomAVLTree } from './modules/Tree/al
 import { TreeVisualizer } from './modules/Tree/components/TreeVisualizer';
 import { PlayerControls } from './components/ui/PlayerControls';
 import { CodeViewer } from './components/ui/CodeViewer';
+import { Sidebar, type SidebarGroup } from './components/layout/Sidebar';
 import { Dropdown } from './components/ui/Dropdown';
 import { useAlgorithmPlayer } from './hooks/useAlgorithmPlayer';
 import type { AlgorithmGenerator, SupportedLanguage, GraphData, AlgorithmStep, AlgorithmProfile } from './types';
@@ -84,6 +86,7 @@ type AlgoConfig<T> = {
   interactive?: boolean;
 };
 
+// Use unknown instead of any to satisfy linter, or just disable for this map where types are mixed (sorting vs graph)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const ALGORITHMS: Record<string, AlgoConfig<any>> = {
   bubble: {
@@ -248,7 +251,7 @@ const LANGUAGES: Record<SupportedLanguage, string> = {
 
 // --- AlgorithmRunner Component ---
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const AlgorithmRunner = ({ config, language, theme }: { config: AlgoConfig<any>, language: SupportedLanguage, theme: 'light' | 'dark' }) => {
+const AlgorithmRunner = ({ config, language, onLanguageChange, theme }: { config: AlgoConfig<any>, language: SupportedLanguage, onLanguageChange: (lang: SupportedLanguage) => void, theme: 'light' | 'dark' }) => {
   const [currentInitialData, setCurrentInitialData] = useState(() => config.getInitialData());
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [interactiveOp, setInteractiveOp] = useState<{ type: string, value: any } | null>(null);
@@ -287,9 +290,6 @@ const AlgorithmRunner = ({ config, language, theme }: { config: AlgoConfig<any>,
 
   const handleInteractiveRun = (type: string, value: number) => {
       // 1. Capture current state as the new initial state
-      // We use the state from the *last step* of the previous run (or current step)
-      // Actually, we should use the state from the *current step* being displayed if we want to branch off?
-      // Typically we want to continue from where we are.
       const currentState = player.currentStep.state;
       setCurrentInitialData(currentState);
 
@@ -298,26 +298,17 @@ const AlgorithmRunner = ({ config, language, theme }: { config: AlgoConfig<any>,
 
       // Force play immediately
       player.controls.reset();
-      // We need to wait for state update to trigger restart?
-      // Actually `autoPlay: !!interactiveOp` in useAlgorithmPlayer handles it if interactiveOp is set.
-      // But we just set it.
-      // The `player.controls` methods set `isPlaying`.
-      // `useAlgorithmPlayer` has `useEffect` on `algorithm` change which resets `isPlaying = false`.
-      // We want to override that or ensure it starts.
-
-      // The `useAlgorithmPlayer` hook now respects `autoPlay` prop changes when determining initial `isPlaying` state.
-      // Since we pass `autoPlay: !!interactiveOp` to the hook, it will auto-play when `interactiveOp` is set.
   };
 
   const VisualizerComponent = config.Visualizer;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-      {/* Main Stage: 8 columns */}
-      <div className="lg:col-span-8 flex flex-col gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-full content-start">
+      {/* Main Stage (Left): 8 columns */}
+      <div className="lg:col-span-8 flex flex-col gap-6 lg:h-full lg:overflow-y-auto lg:pr-1 lg:pb-32 lg:scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
 
         {/* Visualizer Window */}
-        <Card className="relative overflow-hidden min-h-[400px] flex flex-col p-0">
+        <Card className="relative overflow-hidden min-h-[400px] flex-none flex flex-col p-0">
           <div className="absolute top-4 right-4 z-10 flex gap-2">
             {config.interactive && (
                <InteractiveControls onRun={handleInteractiveRun} />
@@ -330,11 +321,11 @@ const AlgorithmRunner = ({ config, language, theme }: { config: AlgoConfig<any>,
             </button>
           </div>
 
-          <div className="flex-1 flex items-center justify-center bg-slate-100/50 dark:bg-slate-900/50 relative">
+          <div className="flex-1 flex items-center justify-center bg-slate-100/50 dark:bg-slate-900/50 relative min-h-[300px]">
             {/* Grid Pattern Background */}
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:20px_20px]"></div>
 
-            <div className="relative z-0 w-full px-8">
+            <div className="relative z-0 w-full px-8 py-8">
               <VisualizerComponent step={player.currentStep} />
             </div>
           </div>
@@ -356,19 +347,35 @@ const AlgorithmRunner = ({ config, language, theme }: { config: AlgoConfig<any>,
           </div>
         </Card>
 
-        {/* Log Console */}
-        <Card title="执行日志" className="min-h-[100px] font-mono text-sm">
-          <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-            <span className="text-blue-500">➜</span>
-            <span>{player.currentStep.log || "准备就绪"}</span>
-          </div>
+        {/* Algorithm Intel (Moved here) */}
+        <Card title="算法情报" className="min-h-[300px] flex flex-col overflow-visible">
+          <AlgorithmIntel profile={config.profile} />
         </Card>
       </div>
 
-      {/* Sidebar: 4 columns */}
-      <div className="lg:col-span-4 flex flex-col gap-6 h-full">
+      {/* Sidebar (Right): 4 columns */}
+      <div className="lg:col-span-4 flex flex-col gap-6 lg:h-full lg:overflow-y-auto lg:pr-1 lg:pb-32 lg:scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
         {/* Code X-Ray */}
-        <Card title="代码透视" className="flex-1 min-h-[400px] flex flex-col p-0 overflow-hidden">
+        <Card
+          title="代码透视"
+          className="min-h-[200px] flex flex-col p-0 overflow-visible"
+          action={
+            <div className="flex items-center gap-1">
+              {Object.entries(LANGUAGES).map(([key, label]) => (
+                <button
+                  key={key}
+                  onClick={() => onLanguageChange(key as SupportedLanguage)}
+                  className={`px-2 py-1 rounded text-xs font-medium transition-all ${language === key
+                      ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-300'
+                      : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50'
+                    }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          }
+        >
           <CodeViewer
             code={config.code[language]}
             activeLabel={player.currentStep.codeLabel}
@@ -377,9 +384,12 @@ const AlgorithmRunner = ({ config, language, theme }: { config: AlgoConfig<any>,
           />
         </Card>
 
-        {/* Algorithm Intel */}
-        <Card title="算法情报" className="min-h-[150px]">
-          <AlgorithmIntel profile={config.profile} />
+        {/* Log Console (Moved here) */}
+        <Card title="执行日志" className="min-h-[100px] flex-none font-mono text-sm">
+          <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+            <span className="text-blue-500">➜</span>
+            <span>{player.currentStep.log || "准备就绪"}</span>
+          </div>
         </Card>
       </div>
     </div>
@@ -389,80 +399,81 @@ const AlgorithmRunner = ({ config, language, theme }: { config: AlgoConfig<any>,
 function App() {
   const [selectedAlgoKey, setSelectedAlgoKey] = useState<string>('bubble');
   const [language, setLanguage] = useState<SupportedLanguage>('javascript');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
   const selectedAlgo = ALGORITHMS[selectedAlgoKey];
 
-    return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300 font-sans text-slate-900 dark:text-slate-200 selection:bg-blue-500/30 relative">
-        
-                          {/* Background Gradients (X-Ray Beams) */}
-        
-                          <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-        
-                            {/* Primary Beam */}
-        
-                            <div className="absolute -top-[50%] -left-[50%] w-[200%] h-[200%] bg-[conic-gradient(from_0deg,transparent_0deg,transparent_140deg,var(--color-beam)_160deg,transparent_180deg)] opacity-30 dark:opacity-20 animate-beam-rotate [--color-beam:#818cf8] dark:[--color-beam:#a78bfa]"></div>
-        
-                            
-        
-                            {/* Secondary Beam */}
-        
-                            <div className="absolute -top-[50%] -left-[50%] w-[200%] h-[200%] bg-[conic-gradient(from_180deg,transparent_0deg,transparent_140deg,var(--color-beam-2)_160deg,transparent_180deg)] opacity-20 dark:opacity-10 animate-beam-rotate-reverse [--color-beam-2:#22d3ee] dark:[--color-beam-2:#2dd4bf]"></div>
-        
-                            
-        
-                            
-        
-                          </div>        <div className="relative z-10">
-          <Header theme={theme} toggleTheme={toggleTheme} />
-  
-          <main className="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto">
-          {/* Control Bar */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
-          <div className="flex items-center gap-4 w-full sm:w-auto">
-            <div className="relative group">
-              <Dropdown
-                options={Object.entries(ALGORITHMS).map(([key, algo]) => ({
-                  value: key,
-                  label: algo.name,
-                }))}
-                value={selectedAlgoKey}
-                onChange={(value) => setSelectedAlgoKey(value)}
-                placeholder="选择算法"
-                className="min-w-[240px]"
-              />
-            </div>
-          </div>
+  // Group algorithms by type for Sidebar
+  const algoGroups = useMemo<SidebarGroup[]>(() => {
+    const groups: Record<string, { value: string; label: string }[]> = {
+      sorting: [],
+      graph: [],
+    };
 
-          <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-            {Object.entries(LANGUAGES).map(([key, label]) => (
-              <button
-                key={key}
-                onClick={() => setLanguage(key as SupportedLanguage)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${language === key
-                    ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm'
-                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50'
-                  }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+    Object.entries(ALGORITHMS).forEach(([key, algo]) => {
+      if (groups[algo.type]) {
+        groups[algo.type].push({ value: key, label: algo.name });
+      }
+    });
+
+    return [
+      { id: 'sorting', label: '排序算法', icon: Code2, items: groups.sorting },
+      { id: 'graph', label: '图算法', icon: GitGraph, items: groups.graph },
+    ];
+  }, []);
+
+    return (
+      <div className="min-h-screen lg:h-screen w-full bg-slate-50 dark:bg-slate-950 transition-colors duration-300 font-sans text-slate-900 dark:text-slate-200 selection:bg-blue-500/30 relative flex flex-col lg:overflow-hidden">
+        
+        {/* Background Gradients (X-Ray Beams) */}
+        <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+          {/* Primary Beam */}
+          <div className="absolute -top-[50%] -left-[50%] w-[200%] h-[200%] bg-[conic-gradient(from_0deg,transparent_0deg,transparent_140deg,var(--color-beam)_160deg,transparent_180deg)] opacity-30 dark:opacity-20 animate-beam-rotate [--color-beam:#818cf8] dark:[--color-beam:#a78bfa]"></div>
+
+          {/* Secondary Beam */}
+          <div className="absolute -top-[50%] -left-[50%] w-[200%] h-[200%] bg-[conic-gradient(from_180deg,transparent_0deg,transparent_140deg,var(--color-beam-2)_160deg,transparent_180deg)] opacity-20 dark:opacity-10 animate-beam-rotate-reverse [--color-beam-2:#22d3ee] dark:[--color-beam-2:#2dd4bf]"></div>
+        </div>
+        
+        {/* Header */}
+        <div className="relative z-50 flex-none">
+          <Header
+            theme={theme}
+            toggleTheme={toggleTheme}
+            onMenuClick={() => setIsSidebarOpen(true)}
+          />
         </div>
 
-        {/* Main Content */}
-        <AlgorithmRunner
-          key={selectedAlgoKey}
-          config={selectedAlgo}
-          language={language}
-          theme={theme}
-        />
+        <div className="flex flex-1 relative z-10 pt-16 max-w-[1920px] mx-auto w-full lg:overflow-hidden">
+           {/* Sidebar */}
+           <Sidebar
+             groups={algoGroups}
+             value={selectedAlgoKey}
+             onChange={setSelectedAlgoKey}
+             isOpen={isSidebarOpen}
+             onClose={() => setIsSidebarOpen(false)}
+           />
 
-        </main>
+           {/* Main Content Area */}
+           <main className="flex-1 flex flex-col lg:overflow-hidden">
+             {/* Header Title (Mobile only) */}
+             <div className="p-4 pb-0 lg:hidden flex-none">
+                <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{selectedAlgo.name}</h1>
+             </div>
+
+             <div className="flex-1 p-4 sm:p-6 lg:p-8 lg:overflow-hidden">
+               <AlgorithmRunner
+                 key={selectedAlgoKey}
+                 config={selectedAlgo}
+                 language={language}
+                 onLanguageChange={setLanguage}
+                 theme={theme}
+               />
+             </div>
+           </main>
+        </div>
       </div>
-    </div>
-  );
+    );
 }
 
 export default App;
