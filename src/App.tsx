@@ -6,6 +6,8 @@ import { bfsAlgorithm, BFS_CODE } from './modules/Graph/algorithms/bfs';
 import { dfsAlgorithm, DFS_CODE } from './modules/Graph/algorithms/dfs';
 import { dijkstraAlgorithm, DIJKSTRA_CODE } from './modules/Graph/algorithms/dijkstra';
 import { GraphVisualizer } from './modules/Graph/components/GraphVisualizer';
+import { avlAlgorithm, AVL_CODE } from './modules/Tree/algorithms/avl';
+import { TreeVisualizer } from './modules/Tree/components/TreeVisualizer';
 import { PlayerControls } from './components/ui/PlayerControls';
 import { CodeViewer } from './components/ui/CodeViewer';
 import { Dropdown } from './components/ui/Dropdown';
@@ -207,6 +209,31 @@ const ALGORITHMS: Record<string, AlgoConfig<any>> = {
     Visualizer: GraphVisualizer,
     type: 'graph',
     startNodeId: 'A',
+  },
+  avl: {
+    name: '平衡二叉树 (AVL Tree)',
+    func: avlAlgorithm,
+    profile: {
+      complexity: {
+        time: 'O(log n)',
+        space: 'O(n)',
+        bestCase: 'O(1) (Hash-like)',
+        worstCase: 'O(log n)'
+      },
+      description: '一种自平衡二叉搜索树，保证任何节点的左右子树高度差不超过1。',
+      howItWorks: '在插入或删除节点后，计算每个节点的平衡因子。如果平衡因子绝对值大于1，通过旋转（LL, RR, LR, RL）来恢复平衡。',
+      keyConcepts: ['二叉搜索树', '平衡因子', '左旋/右旋', '自平衡'],
+      scenarios: ['需要频繁查找且数据变动不频繁的场景', '数据库索引', '集合(Set)和映射(Map)的底层实现'],
+      pitfalls: ['实现复杂，旋转逻辑容易出错', '插入删除开销比红黑树大（维护严格平衡）', '额外存储高度信息'],
+      links: [
+        { label: 'Wikipedia', url: 'https://en.wikipedia.org/wiki/AVL_tree' },
+        { label: 'Visualgo', url: 'https://visualgo.net/en/bst' }
+      ]
+    },
+    code: AVL_CODE,
+    getInitialData: () => ({ nodes: [], edges: [], directed: true }), // Initial empty tree
+    Visualizer: TreeVisualizer,
+    type: 'graph', // It renders as a graph
   },
 };
 
