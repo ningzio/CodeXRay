@@ -9,19 +9,30 @@ export type AlgorithmStep<T> = {
 };
 
 // The generator function signature now accepts additional optional arguments
-export type AlgorithmGenerator<T> = (initialData: T, ...args: any[]) => Generator<AlgorithmStep<T>, void, unknown>;
+export type AlgorithmGenerator<T> = (initialData: T, ...args: unknown[]) => Generator<AlgorithmStep<T>, void, unknown>;
 
 export type SupportedLanguage = 'javascript' | 'python' | 'go';
+
+export type AlgorithmProfile = {
+  complexity: {
+    time: string;
+    space: string;
+    bestCase?: string;
+    worstCase?: string;
+  };
+  description: string; // Short summary
+  howItWorks: string; // More detailed explanation
+  scenarios: string[]; // When to use
+  keyConcepts: string[]; // Key ideas (e.g., "Divide and Conquer")
+  pitfalls?: string[]; // Common mistakes / limitations
+  links?: { label: string; url: string }[]; // External resources
+};
 
 export type Algorithm<T> = {
   id: string;
   label: string;
-  description?: string;
+  profile: AlgorithmProfile;
   run: AlgorithmGenerator<T>;
-  complexity?: {
-    time: string;
-    space: string;
-  };
   code: Record<SupportedLanguage, string>; // Map of language to display code with @label comments
 };
 

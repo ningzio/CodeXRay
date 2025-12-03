@@ -33,7 +33,7 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({ code, activeLabel }) => 
   return (
     <div 
       ref={scrollContainerRef}
-      className="h-full overflow-y-auto font-mono text-xs sm:text-sm"
+      className="h-auto overflow-visible font-mono text-xs sm:text-sm"
     >
       <div className="flex flex-col min-h-full">
         {lines.map((line, index) => {
