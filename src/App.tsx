@@ -259,9 +259,9 @@ const AlgorithmRunner = ({
   const VisualizerComponent = config.Visualizer;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full content-start">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-full content-start">
       {/* Main Stage: 8 columns */}
-      <div className="lg:col-span-8 flex flex-col gap-6 h-full overflow-y-auto pr-1 pb-4 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
+      <div className="lg:col-span-8 flex flex-col gap-6 lg:h-full lg:overflow-y-auto lg:pr-1 lg:pb-4 lg:scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
 
         {/* Visualizer Window */}
         <Card className="relative overflow-hidden min-h-[400px] flex-none flex flex-col p-0">
@@ -310,11 +310,11 @@ const AlgorithmRunner = ({
       </div>
 
       {/* Sidebar: 4 columns */}
-      <div className="lg:col-span-4 flex flex-col gap-6 h-full overflow-hidden">
+      <div className="lg:col-span-4 flex flex-col gap-6 lg:h-full overflow-hidden">
         {/* Code X-Ray */}
         <Card
           title="代码透视"
-          className="flex-1 min-h-0 flex flex-col p-0 overflow-hidden"
+          className="lg:flex-[55%] min-h-[500px] lg:min-h-0 flex flex-col p-0 overflow-hidden"
           action={
             <div className="flex items-center gap-1">
               {Object.entries(LANGUAGES).map(([key, label]) => (
@@ -339,7 +339,7 @@ const AlgorithmRunner = ({
         </Card>
 
         {/* Algorithm Intel */}
-        <Card title="算法情报" className="h-[35%] min-h-[200px] flex flex-col overflow-hidden">
+        <Card title="算法情报" className="lg:flex-[45%] min-h-[300px] flex flex-col overflow-hidden">
           <AlgorithmIntel profile={config.profile} />
         </Card>
       </div>
@@ -375,7 +375,7 @@ function App() {
   }, []);
 
     return (
-      <div className="h-screen w-full bg-slate-50 dark:bg-slate-950 transition-colors duration-300 font-sans text-slate-900 dark:text-slate-200 selection:bg-blue-500/30 relative flex flex-col overflow-hidden">
+      <div className="min-h-screen lg:h-screen w-full bg-slate-50 dark:bg-slate-950 transition-colors duration-300 font-sans text-slate-900 dark:text-slate-200 selection:bg-blue-500/30 relative flex flex-col lg:overflow-hidden">
         
         {/* Background Gradients (X-Ray Beams) */}
         <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
@@ -395,7 +395,7 @@ function App() {
           />
         </div>
 
-        <div className="flex flex-1 relative z-10 pt-16 max-w-[1920px] mx-auto w-full overflow-hidden">
+        <div className="flex flex-1 relative z-10 pt-16 max-w-[1920px] mx-auto w-full lg:overflow-hidden">
            {/* Sidebar */}
            <Sidebar
              groups={algoGroups}
@@ -406,13 +406,13 @@ function App() {
            />
 
            {/* Main Content Area */}
-           <main className="flex-1 flex flex-col overflow-hidden">
+           <main className="flex-1 flex flex-col lg:overflow-hidden">
              {/* Header Title (Mobile only) */}
              <div className="p-4 pb-0 lg:hidden flex-none">
                 <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{selectedAlgo.name}</h1>
              </div>
 
-             <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-hidden">
+             <div className="flex-1 p-4 sm:p-6 lg:p-8 lg:overflow-hidden">
                <AlgorithmRunner
                  key={selectedAlgoKey}
                  config={selectedAlgo}
