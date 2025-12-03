@@ -23,6 +23,11 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({ code, activeLabel, langu
     if (activeLineIndex !== -1) {
       // We use a timeout to ensure the DOM has updated if the code changed
       const timer = setTimeout(() => {
+        // Disable auto-scroll on mobile (screen width < 1024px) to prevent page jumping
+        // while the user is watching the visualizer animation.
+        const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
+        if (!isDesktop) return;
+
         const element = document.getElementById(`code-line-${activeLineIndex}`);
         if (element) {
           element.scrollIntoView({ behavior: 'smooth', block: 'center' });
