@@ -37,10 +37,10 @@ export function useAlgorithmPlayer<T>({
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setSteps(generatedSteps);
     setCurrentStepIndex(0);
-    setIsPlaying(false);
+    setIsPlaying(autoPlay); // Respect autoPlay prop on reset
     
     if (timerRef.current) clearInterval(timerRef.current);
-  }, [algorithm, initialData]);
+  }, [algorithm, initialData, autoPlay]);
 
   // Playback logic
   useEffect(() => {
