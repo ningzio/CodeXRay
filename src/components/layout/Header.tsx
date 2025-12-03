@@ -1,5 +1,6 @@
 import React from 'react';
 import { Moon, Sun, Github } from 'lucide-react';
+import logo from '../../assets/logo.png';
 
 interface HeaderProps {
   theme: 'light' | 'dark';
@@ -13,9 +14,7 @@ export const Header: React.FC<HeaderProps> = ({ theme, toggleTheme }) => {
         
         {/* Logo Area */}
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
-            <span className="text-white font-bold text-lg font-mono">X</span>
-          </div>
+          <img src={logo} alt="CodeXRay Logo" className="w-8 h-8 rounded-lg object-contain shadow-lg shadow-blue-500/20" />
           <div>
             <h1 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white leading-none">
               CodeXRay
