@@ -8,6 +8,7 @@ import { dfsAlgorithm, DFS_CODE } from './modules/Graph/algorithms/dfs';
 import { dijkstraAlgorithm, DIJKSTRA_CODE } from './modules/Graph/algorithms/dijkstra';
 import { GraphVisualizer } from './modules/Graph/components/GraphVisualizer';
 import { avlAlgorithm, AVL_CODE, generateRandomAVLTree } from './modules/Tree/algorithms/avl';
+import { redBlackTreeAlgorithm, RED_BLACK_TREE_CODE, generateRandomRedBlackTree } from './modules/Tree/algorithms/redBlackTree';
 import { TreeVisualizer } from './modules/Tree/components/TreeVisualizer';
 import { PlayerControls } from './components/ui/PlayerControls';
 import { CodeViewer } from './components/ui/CodeViewer';
@@ -236,6 +237,32 @@ const ALGORITHMS: Record<string, AlgoConfig<any>> = {
     },
     code: AVL_CODE,
     getInitialData: () => generateRandomAVLTree(12),
+    Visualizer: TreeVisualizer,
+    type: 'tree',
+    interactive: true,
+  },
+  rbt: {
+    name: '红黑树 (Red-Black Tree)',
+    func: redBlackTreeAlgorithm,
+    profile: {
+      complexity: {
+        time: 'O(log n)',
+        space: 'O(n)',
+        bestCase: 'O(log n)',
+        worstCase: 'O(log n)'
+      },
+      description: '一种广泛应用的自平衡二叉搜索树，通过节点颜色约束来维持大致平衡。',
+      howItWorks: '每个节点被标记为红色或黑色。通过五条关键性质（如根是黑色、红节点子节点必黑、所有路径黑高相同）来约束树高，确保最长路径不超过最短路径的两倍。',
+      keyConcepts: ['颜色标记', '黑高 (Black Height)', '颜色翻转', '旋转'],
+      scenarios: ['Java TreeMap/TreeSet', 'C++ std::map/set', 'Linux 进程调度 (CFS)'],
+      pitfalls: ['实现极为繁琐，边界情况多', '理解"黑高"概念有难度', '删除操作的修复逻辑非常复杂'],
+      links: [
+        { label: 'Wikipedia', url: 'https://en.wikipedia.org/wiki/Red%E2%80%93black_tree' },
+        { label: 'Visualgo', url: 'https://visualgo.net/en/bst' }
+      ]
+    },
+    code: RED_BLACK_TREE_CODE,
+    getInitialData: () => generateRandomRedBlackTree(12),
     Visualizer: TreeVisualizer,
     type: 'tree',
     interactive: true,

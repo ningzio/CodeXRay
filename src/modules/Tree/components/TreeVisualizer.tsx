@@ -13,6 +13,8 @@ const NODE_COLORS = {
   visited: 'fill-green-400 dark:fill-green-500',
   highlighted: 'fill-blue-400 dark:fill-blue-500',
   deleted: 'fill-red-400 dark:fill-red-500',
+  red: 'fill-red-500 dark:fill-red-600',
+  black: 'fill-slate-800 dark:fill-slate-950',
 };
 
 const EDGE_COLORS = {
@@ -61,7 +63,10 @@ export const TreeVisualizer: React.FC<TreeVisualizerProps> = ({ step }) => {
         {/* Nodes */}
         {graph.nodes.map((node) => {
           let nodeColorClass = NODE_COLORS.unvisited;
-          if (node.status === 'visiting') nodeColorClass = NODE_COLORS.visiting;
+
+          if (node.color === 'red') nodeColorClass = NODE_COLORS.red;
+          else if (node.color === 'black') nodeColorClass = NODE_COLORS.black;
+          else if (node.status === 'visiting') nodeColorClass = NODE_COLORS.visiting;
           else if (node.status === 'visited') nodeColorClass = NODE_COLORS.visited;
 
           // Highlight overrides status color
@@ -100,12 +105,18 @@ export const TreeVisualizer: React.FC<TreeVisualizerProps> = ({ step }) => {
             const textWidth = label.length * CHAR_WIDTH;
             rx = Math.max(NODE_RADIUS, textWidth / 2 + 8);
 
+            // Determine text color based on node color (black/red nodes usually need white text)
+            let textColorClass = "fill-slate-600 dark:fill-slate-200";
+            if (node.color === 'black' || node.color === 'red') {
+                textColorClass = "fill-white dark:fill-slate-200";
+            }
+
             content = (
               <text
                 x="0"
                 y="5"
                 textAnchor="middle"
-                className="fill-slate-600 dark:fill-slate-200 text-xs font-bold pointer-events-none select-none font-mono"
+                className={`${textColorClass} text-xs font-bold pointer-events-none select-none font-mono`}
               >
                 {label}
               </text>
