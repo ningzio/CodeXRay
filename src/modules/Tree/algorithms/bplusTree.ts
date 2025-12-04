@@ -1,4 +1,4 @@
-import type { AlgorithmGenerator, GraphData, GraphNode, GraphEdge } from "../../../types";
+import type { AlgorithmGenerator, AlgorithmStep, GraphData, GraphNode, GraphEdge } from "../../../types";
 
 const ORDER = 4; // Max children = 4, Max keys = 3. Min children = 2, Min keys = 1 (except root)
 
@@ -191,9 +191,14 @@ export const bPlusTreeAlgorithm: AlgorithmGenerator<GraphData> = function* (init
         // 3. Identify Root
         if (potentialRoots.size > 0) {
             const rootId = potentialRoots.values().next().value;
-            tree.root = nodeMap.get(rootId)!;
+            // potentialRoots is Set<string>, rootId is string
+            if (rootId) {
+                const rootNode = nodeMap.get(rootId);
+                if (rootNode) tree.root = rootNode;
+            }
         } else if (nodeMap.size > 0) {
-             tree.root = nodeMap.values().next().value;
+             const fallbackRoot = nodeMap.values().next().value;
+             if (fallbackRoot) tree.root = fallbackRoot;
         }
 
         // 4. Refine Structure
@@ -279,7 +284,7 @@ export const bPlusTreeAlgorithm: AlgorithmGenerator<GraphData> = function* (init
         yield* insertParent(node, splitKey, newLeaf);
     }
 
-    function* insertParent(left: BPlusNode, key: number, right: BPlusNode) {
+    function* insertParent(left: BPlusNode, key: number, right: BPlusNode): Generator<AlgorithmStep<GraphData>, void, unknown> {
         const parent = left.parent;
 
         if (!parent) {
@@ -310,7 +315,7 @@ export const bPlusTreeAlgorithm: AlgorithmGenerator<GraphData> = function* (init
         }
     }
 
-    function* splitInternal(node: BPlusNode) {
+    function* splitInternal(node: BPlusNode): Generator<AlgorithmStep<GraphData>, void, unknown> {
         const newInternal = new BPlusNode(false);
         const mid = Math.floor(node.keys.length / 2);
 
@@ -362,7 +367,7 @@ export const bPlusTreeAlgorithm: AlgorithmGenerator<GraphData> = function* (init
         }
     }
 
-    function* handleUnderflow(node: BPlusNode) {
+    function* handleUnderflow(node: BPlusNode): Generator<AlgorithmStep<GraphData>, void, unknown> {
         if (node === tree.root) {
             if (node.keys.length === 0 && !node.isLeaf) {
                 tree.root = node.children[0];
@@ -431,7 +436,7 @@ export const bPlusTreeAlgorithm: AlgorithmGenerator<GraphData> = function* (init
         }
     }
 
-    function* merge(left: BPlusNode, right: BPlusNode, separatorIdx: number) {
+    function* merge(left: BPlusNode, right: BPlusNode, separatorIdx: number): Generator<AlgorithmStep<GraphData>, void, unknown> {
         const parent = left.parent!;
         const separator = parent.keys[separatorIdx];
 
@@ -479,7 +484,7 @@ export const bPlusTreeAlgorithm: AlgorithmGenerator<GraphData> = function* (init
     }
 };
 
-export const generateRandomBPlusTree = (count: number): GraphData => {
+export const generateRandomBPlusTree = (_count: number): GraphData => {
     // Return a simple tree for init
     const tree = new BPlusTree();
     tree.root.keys = [10, 20];
