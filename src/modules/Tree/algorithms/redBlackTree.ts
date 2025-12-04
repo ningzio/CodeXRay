@@ -399,15 +399,15 @@ class RedBlackTree {
 
             if (node.left) {
                 edges.push({ id: `e-${node.id}-${node.left.id}`, source: node.id, target: node.left.id, status: 'default' });
-                traverse(node.left, x - offset, y + 60, offset / 1.8);
+                traverse(node.left, x - offset, y + 60, offset * 0.55);
             }
             if (node.right) {
                 edges.push({ id: `e-${node.id}-${node.right.id}`, source: node.id, target: node.right.id, status: 'default' });
-                traverse(node.right, x + offset, y + 60, offset / 1.8);
+                traverse(node.right, x + offset, y + 60, offset * 0.55);
             }
         };
 
-        traverse(this.root, 400, 50, 160);
+        traverse(this.root, 400, 40, 180);
         return { nodes, edges, directed: true };
     }
 }
@@ -814,7 +814,9 @@ export const generateRandomRedBlackTree = (count: number): GraphData => {
     // Generate simple BST then fix it? No, just run the logic.
     const tree = new RedBlackTree();
     const values: number[] = [];
-    while(values.length < count) {
+    // Reduce initial count to prevent overcrowding on load
+    const initialCount = Math.min(count, 10);
+    while(values.length < initialCount) {
         const val = Math.floor(Math.random() * 100) + 1;
         if(!values.includes(val)) values.push(val);
     }

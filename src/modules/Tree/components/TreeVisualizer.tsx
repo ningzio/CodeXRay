@@ -5,8 +5,8 @@ interface TreeVisualizerProps {
   step: AlgorithmStep<GraphData>;
 }
 
-const NODE_RADIUS = 22;
-const CHAR_WIDTH = 8; // Approximate width for mono font
+const NODE_RADIUS = 18;
+const CHAR_WIDTH = 7; // Approximate width for mono font
 const NODE_COLORS = {
   unvisited: 'fill-slate-200 dark:fill-slate-700',
   visiting: 'fill-yellow-400 dark:fill-yellow-500',
