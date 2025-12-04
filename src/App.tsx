@@ -9,6 +9,8 @@ import { dijkstraAlgorithm, DIJKSTRA_CODE } from './modules/Graph/algorithms/dij
 import { GraphVisualizer } from './modules/Graph/components/GraphVisualizer';
 import { avlAlgorithm, AVL_CODE, generateRandomAVLTree } from './modules/Tree/algorithms/avl';
 import { redBlackTreeAlgorithm, RED_BLACK_TREE_CODE, generateRandomRedBlackTree } from './modules/Tree/algorithms/redBlackTree';
+import { bPlusTreeAlgorithm, generateRandomBPlusTree } from './modules/Tree/algorithms/bplusTree';
+import { B_PLUS_TREE_CODE } from './modules/Tree/algorithms/bplusTreeCode';
 import { TreeVisualizer } from './modules/Tree/components/TreeVisualizer';
 import { PlayerControls } from './components/ui/PlayerControls';
 import { CodeViewer } from './components/ui/CodeViewer';
@@ -263,6 +265,32 @@ const ALGORITHMS: Record<string, AlgoConfig<any>> = {
     },
     code: RED_BLACK_TREE_CODE,
     getInitialData: () => generateRandomRedBlackTree(12),
+    Visualizer: TreeVisualizer,
+    type: 'tree',
+    interactive: true,
+  },
+  bplus: {
+    name: 'B+ 树 (B+ Tree)',
+    func: bPlusTreeAlgorithm,
+    profile: {
+      complexity: {
+        time: 'O(log n)',
+        space: 'O(n)',
+        bestCase: 'O(1) (Root)',
+        worstCase: 'O(log n)'
+      },
+      description: '专为磁盘存储设计的自平衡树，所有数据都在叶子节点，适合范围查询。',
+      howItWorks: '每个节点包含多个键值 (Block)。内部节点仅做索引，叶子节点存储数据并用链表连接。插入满时分裂，删除少时合并或借位，保证树高度极低且平衡。',
+      keyConcepts: ['多路搜索树', '磁盘 I/O 优化', '叶子链表', '分裂与合并'],
+      scenarios: ['数据库索引 (MySQL InnoDB)', '文件系统 (NTFS, Ext4)', '需要大量范围查询的场景'],
+      pitfalls: ['实现极为复杂 (分裂/合并情况多)', '节点大小需与磁盘页大小匹配', '内存中优势不如红黑树'],
+      links: [
+        { label: 'Wikipedia', url: 'https://en.wikipedia.org/wiki/B%2B_tree' },
+        { label: 'USFCA Visualization', url: 'https://www.cs.usfca.edu/~galles/visualization/BPlusTree.html' }
+      ]
+    },
+    code: B_PLUS_TREE_CODE,
+    getInitialData: () => generateRandomBPlusTree(5),
     Visualizer: TreeVisualizer,
     type: 'tree',
     interactive: true,
