@@ -31,7 +31,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
       {/* Progress Bar */}
       <div className="flex items-center gap-4">
         <span className="text-xs text-slate-500 dark:text-slate-400 font-mono w-20 text-right">
-          {currentStep} / {totalSteps > 0 ? totalSteps - 1 : 0}
+          {totalSteps > 0 ? currentStep + 1 : 0} / {totalSteps > 0 ? totalSteps : 0}
         </span>
         <input
           type="range"
