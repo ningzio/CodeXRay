@@ -252,13 +252,13 @@ const ALGORITHMS: Record<string, AlgoConfig<any>> = {
         worstCase: 'O(log n)'
       },
       description: '一种广泛应用的自平衡二叉搜索树，通过节点颜色约束来维持大致平衡。',
-      howItWorks: '每个节点被标记为红色或黑色。通过五条关键性质（如根是黑色、红节点子节点必黑、所有路径黑高相同）来约束树高，确保最长路径不超过最短路径的两倍。',
+      howItWorks: '每个节点被标记为红色或黑色。通过五条关键性质来约束树高：1. 节点是红色或黑色。2. 根节点是黑色。3. 所有叶子节点(NIL)是黑色。4. 红色节点的子节点必须是黑色。5. 从任一节点到其每个叶子的所有简单路径都包含相同数目的黑色节点。',
       keyConcepts: ['颜色标记', '黑高 (Black Height)', '颜色翻转', '旋转'],
       scenarios: ['Java TreeMap/TreeSet', 'C++ std::map/set', 'Linux 进程调度 (CFS)'],
       pitfalls: ['实现极为繁琐，边界情况多', '理解"黑高"概念有难度', '删除操作的修复逻辑非常复杂'],
       links: [
         { label: 'Wikipedia', url: 'https://en.wikipedia.org/wiki/Red%E2%80%93black_tree' },
-        { label: 'Visualgo', url: 'https://visualgo.net/en/bst' }
+        { label: 'USFCA Visualization', url: 'https://www.cs.usfca.edu/~galles/visualization/RedBlack.html' }
       ]
     },
     code: RED_BLACK_TREE_CODE,

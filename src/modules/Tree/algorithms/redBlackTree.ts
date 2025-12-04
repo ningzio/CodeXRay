@@ -29,10 +29,42 @@ export const RED_BLACK_TREE_CODE: Record<SupportedLanguage, string> = {
         }
       } else {
         // Symmetric case
-        // ...
       }
     }
     this.root.color = 'BLACK'; // @label:root_black
+  }
+
+  delete(key) {
+     const node = this.search(key);
+     if (!node) return;
+     let y = node;
+     let yOriginalColor = y.color;
+     let x;
+     if (!node.left) {
+        x = node.right;
+        this.transplant(node, node.right);
+     } else if (!node.right) {
+        x = node.left;
+        this.transplant(node, node.left);
+     } else {
+        y = this.minimum(node.right);
+        yOriginalColor = y.color;
+        x = y.right;
+        if (y.parent === node) {
+            if(x) x.parent = y;
+        } else {
+            this.transplant(y, y.right);
+            y.right = node.right;
+            y.right.parent = y;
+        }
+        this.transplant(node, y);
+        y.left = node.left;
+        y.left.parent = y;
+        y.color = node.color;
+     }
+     if (yOriginalColor === 'BLACK') {
+        this.deleteFixup(x);
+     }
   }
 }`,
   python: `class RedBlackTree:
@@ -60,7 +92,35 @@ export const RED_BLACK_TREE_CODE: Record<SupportedLanguage, string> = {
             else:
                 # Symmetric case
                 pass
-        self.root.color = 'BLACK' # @label:root_black`,
+        self.root.color = 'BLACK' # @label:root_black
+
+    def delete(self, key):
+        z = self.search(key)
+        if not z: return
+        y = z
+        y_original_color = y.color
+        if not z.left:
+            x = z.right
+            self.transplant(z, z.right)
+        elif not z.right:
+            x = z.left
+            self.transplant(z, z.left)
+        else:
+            y = self.minimum(z.right)
+            y_original_color = y.color
+            x = y.right
+            if y.parent == z:
+                if x: x.parent = y
+            else:
+                self.transplant(y, y.right)
+                y.right = z.right
+                y.right.parent = y
+            self.transplant(z, y)
+            y.left = z.left
+            y.left.parent = y
+            y.color = z.color
+        if y_original_color == 'BLACK':
+            self.delete_fixup(x)`,
   go: `func (t *RedBlackTree) Insert(key int) {
     node := &Node{Key: key, Color: RED} // @label:create_node
     t.insertBST(node) // @label:insert_bst
@@ -90,6 +150,39 @@ func (t *RedBlackTree) fixInsert(node *Node) {
         }
     }
     t.Root.Color = BLACK // @label:root_black
+}
+
+func (t *RedBlackTree) Delete(key int) {
+    z := t.Search(key)
+    if z == nil { return }
+    y := z
+    yOriginalColor := y.Color
+    var x *Node
+    if z.Left == nil {
+        x = z.Right
+        t.Transplant(z, z.Right)
+    } else if z.Right == nil {
+        x = z.Left
+        t.Transplant(z, z.Left)
+    } else {
+        y = t.Minimum(z.Right)
+        yOriginalColor = y.Color
+        x = y.Right
+        if y.Parent == z {
+            if x != nil { x.Parent = y }
+        } else {
+            t.Transplant(y, y.Right)
+            y.Right = z.Right
+            y.Right.Parent = y
+        }
+        t.Transplant(z, y)
+        y.Left = z.Left
+        y.Left.Parent = y
+        y.Color = z.Color
+    }
+    if yOriginalColor == BLACK {
+        t.DeleteFixup(x)
+    }
 }`
 };
 
