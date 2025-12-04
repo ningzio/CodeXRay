@@ -78,6 +78,8 @@ const getAdjacencyList = (graphData: GraphData): Map<string, string[]> => {
   return adjList;
 };
 
+const cloneGraph = (graph: GraphData): GraphData => JSON.parse(JSON.stringify(graph));
+
 // --- DFS Algorithm Generator ---
 export const dfsAlgorithm: AlgorithmGenerator<GraphData> = function* (initialGraph: GraphData, startNodeId: string = initialGraph.nodes[0]?.id) {
   if (!startNodeId) {
@@ -100,7 +102,7 @@ export const dfsAlgorithm: AlgorithmGenerator<GraphData> = function* (initialGra
   const visited = new Set<string>();
 
   yield {
-    state: graph,
+    state: cloneGraph(graph),
     log: "开始 DFS 算法...",
     codeLabel: 'initStack'
   };
@@ -109,7 +111,7 @@ export const dfsAlgorithm: AlgorithmGenerator<GraphData> = function* (initialGra
   startNode.status = 'visiting'; // Mark as visiting (in stack)
 
   yield {
-    state: graph,
+    state: cloneGraph(graph),
     log: `将起始节点 ${startNodeId} 压入栈。`,
     codeLabel: 'initStack',
     highlightIndices: [graph.nodes.findIndex(n => n.id === startNodeId)],
@@ -117,7 +119,7 @@ export const dfsAlgorithm: AlgorithmGenerator<GraphData> = function* (initialGra
 
   while (stack.length > 0) {
     yield {
-      state: graph,
+      state: cloneGraph(graph),
       log: "检查栈，如果非空则继续。",
       codeLabel: 'loopStack',
     };
@@ -126,14 +128,14 @@ export const dfsAlgorithm: AlgorithmGenerator<GraphData> = function* (initialGra
     const currentNode = graph.nodes.find(node => node.id === currentNodeId)!;
 
     yield {
-      state: graph,
+      state: cloneGraph(graph),
       log: `从栈中弹出节点 ${currentNodeId}。`,
       codeLabel: 'popStack',
       highlightIndices: [graph.nodes.findIndex(n => n.id === currentNodeId)],
     };
 
     yield {
-      state: graph,
+      state: cloneGraph(graph),
       log: `检查节点 ${currentNodeId} 是否已访问。`,
       codeLabel: 'checkVisited',
       highlightIndices: [graph.nodes.findIndex(n => n.id === currentNodeId)],
@@ -144,7 +146,7 @@ export const dfsAlgorithm: AlgorithmGenerator<GraphData> = function* (initialGra
       currentNode.status = 'visited';
 
       yield {
-        state: graph,
+        state: cloneGraph(graph),
         log: `节点 ${currentNodeId} 未被访问，标记为已访问。`,
         codeLabel: 'visitNode',
         highlightIndices: [graph.nodes.findIndex(n => n.id === currentNodeId)],
@@ -159,7 +161,7 @@ export const dfsAlgorithm: AlgorithmGenerator<GraphData> = function* (initialGra
       currentEdges.forEach(edge => edge.status = 'active');
 
       yield {
-        state: graph,
+        state: cloneGraph(graph),
         log: `获取节点 ${currentNodeId} 的所有邻居 (逆序)。`,
         codeLabel: 'loopNeighbors',
         highlightIndices: [graph.nodes.findIndex(n => n.id === currentNodeId)],
@@ -177,7 +179,7 @@ export const dfsAlgorithm: AlgorithmGenerator<GraphData> = function* (initialGra
         if (connectingEdge) connectingEdge.status = 'active';
 
         yield {
-          state: graph,
+          state: cloneGraph(graph),
           log: `检查邻居节点 ${neighborId}。`,
           codeLabel: 'checkNeighbor',
           highlightIndices: [graph.nodes.findIndex(n => n.id === neighborId)],
@@ -191,7 +193,7 @@ export const dfsAlgorithm: AlgorithmGenerator<GraphData> = function* (initialGra
            if (connectingEdge) connectingEdge.status = 'traversed';
 
            yield {
-             state: graph,
+             state: cloneGraph(graph),
              log: `邻居 ${neighborId} 未被访问，压入栈中。`,
              codeLabel: 'pushStack',
              highlightIndices: [graph.nodes.findIndex(n => n.id === neighborId)],
@@ -203,7 +205,7 @@ export const dfsAlgorithm: AlgorithmGenerator<GraphData> = function* (initialGra
       }
     } else {
       yield {
-        state: graph,
+        state: cloneGraph(graph),
         log: `节点 ${currentNodeId} 已被访问，跳过。`,
         codeLabel: 'checkVisited',
         highlightIndices: [graph.nodes.findIndex(n => n.id === currentNodeId)],
@@ -212,7 +214,7 @@ export const dfsAlgorithm: AlgorithmGenerator<GraphData> = function* (initialGra
   }
 
   yield {
-    state: graph,
+    state: cloneGraph(graph),
     log: "DFS 算法完成!",
   };
 };
