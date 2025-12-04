@@ -66,6 +66,16 @@ export const RED_BLACK_TREE_CODE: Record<SupportedLanguage, string> = {
         this.deleteFixup(x);
      }
   }
+
+  search(key) {
+    let current = this.root;
+    while (current) {
+        if (key === current.key) return current;
+        if (key < current.key) current = current.left;
+        else current = current.right;
+    }
+    return null;
+  }
 }`,
   python: `class RedBlackTree:
     def insert(self, key):
@@ -120,7 +130,17 @@ export const RED_BLACK_TREE_CODE: Record<SupportedLanguage, string> = {
             y.left.parent = y
             y.color = z.color
         if y_original_color == 'BLACK':
-            self.delete_fixup(x)`,
+            self.delete_fixup(x)
+
+    def search(self, key):
+        current = self.root
+        while current:
+            if key == current.key: return current
+            if key < current.key:
+                current = current.left
+            else:
+                current = current.right
+        return None`,
   go: `func (t *RedBlackTree) Insert(key int) {
     node := &Node{Key: key, Color: RED} // @label:create_node
     t.insertBST(node) // @label:insert_bst
@@ -183,6 +203,19 @@ func (t *RedBlackTree) Delete(key int) {
     if yOriginalColor == BLACK {
         t.DeleteFixup(x)
     }
+}
+
+func (t *RedBlackTree) Search(key int) *Node {
+    current := t.Root
+    for current != nil {
+        if key == current.Key { return current }
+        if key < current.Key {
+            current = current.Left
+        } else {
+            current = current.Right
+        }
+    }
+    return nil
 }`
 };
 
