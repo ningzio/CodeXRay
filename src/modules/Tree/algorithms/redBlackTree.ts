@@ -35,19 +35,19 @@ export const RED_BLACK_TREE_CODE: Record<SupportedLanguage, string> = {
   }
 
   delete(key) {
-     const node = this.search(key);
-     if (!node) return;
+     const node = this.search(key); // @label:delete_search
+     if (!node) return; // @label:delete_check
      let y = node;
      let yOriginalColor = y.color;
      let x;
-     if (!node.left) {
+     if (!node.left) { // @label:delete_case_0
         x = node.right;
         this.transplant(node, node.right);
      } else if (!node.right) {
         x = node.left;
         this.transplant(node, node.left);
      } else {
-        y = this.minimum(node.right);
+        y = this.minimum(node.right); // @label:delete_case_2
         yOriginalColor = y.color;
         x = y.right;
         if (y.parent === node) {
@@ -57,24 +57,57 @@ export const RED_BLACK_TREE_CODE: Record<SupportedLanguage, string> = {
             y.right = node.right;
             y.right.parent = y;
         }
-        this.transplant(node, y);
+        this.transplant(node, y); // @label:delete_transplant
         y.left = node.left;
         y.left.parent = y;
         y.color = node.color;
      }
      if (yOriginalColor === 'BLACK') {
-        this.deleteFixup(x);
+        this.deleteFixup(x); // @label:delete_fix_call
      }
   }
 
-  search(key) {
-    let current = this.root;
-    while (current) {
-        if (key === current.key) return current;
-        if (key < current.key) current = current.left;
-        else current = current.right;
+  deleteFixup(x) {
+    while (x !== this.root && x.color === 'BLACK') { // @label:fix_delete_loop
+      if (x === x.parent.left) {
+        let w = x.parent.right;
+        if (w.color === 'RED') { // @label:fix_delete_case1
+          w.color = 'BLACK';
+          x.parent.color = 'RED';
+          this.leftRotate(x.parent);
+          w = x.parent.right;
+        }
+        if (w.left.color === 'BLACK' && w.right.color === 'BLACK') { // @label:fix_delete_case2
+          w.color = 'RED';
+          x = x.parent;
+        } else {
+          if (w.right.color === 'BLACK') { // @label:fix_delete_case3
+            w.left.color = 'BLACK';
+            w.color = 'RED';
+            this.rightRotate(w);
+            w = x.parent.right;
+          }
+          w.color = x.parent.color; // @label:fix_delete_case4
+          x.parent.color = 'BLACK';
+          w.right.color = 'BLACK';
+          this.leftRotate(x.parent);
+          x = this.root;
+        }
+      } else {
+        // Symmetric case
+      }
     }
-    return null;
+    x.color = 'BLACK'; // @label:fix_delete_end
+  }
+
+  search(key) {
+    let current = this.root; // @label:search_root
+    while (current) {
+        if (key === current.key) return current; // @label:search_found
+        if (key < current.key) current = current.left; // @label:search_left
+        else current = current.right; // @label:search_right
+    }
+    return null; // @label:search_end
   }
 }`,
   python: `class RedBlackTree:
@@ -105,17 +138,17 @@ export const RED_BLACK_TREE_CODE: Record<SupportedLanguage, string> = {
         self.root.color = 'BLACK' # @label:root_black
 
     def delete(self, key):
-        z = self.search(key)
-        if not z: return
+        z = self.search(key) # @label:delete_search
+        if not z: return # @label:delete_check
         y = z
         y_original_color = y.color
-        if not z.left:
+        if not z.left: # @label:delete_case_0
             x = z.right
             self.transplant(z, z.right)
         elif not z.right:
             x = z.left
             self.transplant(z, z.left)
-        else:
+        else: # @label:delete_case_2
             y = self.minimum(z.right)
             y_original_color = y.color
             x = y.right
@@ -125,22 +158,50 @@ export const RED_BLACK_TREE_CODE: Record<SupportedLanguage, string> = {
                 self.transplant(y, y.right)
                 y.right = z.right
                 y.right.parent = y
-            self.transplant(z, y)
+            self.transplant(z, y) # @label:delete_transplant
             y.left = z.left
             y.left.parent = y
             y.color = z.color
         if y_original_color == 'BLACK':
-            self.delete_fixup(x)
+            self.delete_fixup(x) # @label:delete_fix_call
+
+    def delete_fixup(self, x):
+        while x != self.root and x.color == 'BLACK': # @label:fix_delete_loop
+            if x == x.parent.left:
+                w = x.parent.right
+                if w.color == 'RED': # @label:fix_delete_case1
+                    w.color = 'BLACK'
+                    x.parent.color = 'RED'
+                    self.left_rotate(x.parent)
+                    w = x.parent.right
+                if w.left.color == 'BLACK' and w.right.color == 'BLACK': # @label:fix_delete_case2
+                    w.color = 'RED'
+                    x = x.parent
+                else:
+                    if w.right.color == 'BLACK': # @label:fix_delete_case3
+                        w.left.color = 'BLACK'
+                        w.color = 'RED'
+                        self.right_rotate(w)
+                        w = x.parent.right
+                    w.color = x.parent.color # @label:fix_delete_case4
+                    x.parent.color = 'BLACK'
+                    w.right.color = 'BLACK'
+                    self.left_rotate(x.parent)
+                    x = self.root
+            else:
+                # Symmetric case
+                pass
+        x.color = 'BLACK' # @label:fix_delete_end
 
     def search(self, key):
-        current = self.root
+        current = self.root # @label:search_root
         while current:
-            if key == current.key: return current
-            if key < current.key:
+            if key == current.key: return current # @label:search_found
+            if key < current.key: # @label:search_left
                 current = current.left
-            else:
+            else: # @label:search_right
                 current = current.right
-        return None`,
+        return None # @label:search_end`,
   go: `func (t *RedBlackTree) Insert(key int) {
     node := &Node{Key: key, Color: RED} // @label:create_node
     t.insertBST(node) // @label:insert_bst
@@ -173,18 +234,18 @@ func (t *RedBlackTree) fixInsert(node *Node) {
 }
 
 func (t *RedBlackTree) Delete(key int) {
-    z := t.Search(key)
-    if z == nil { return }
+    z := t.Search(key) // @label:delete_search
+    if z == nil { return } // @label:delete_check
     y := z
     yOriginalColor := y.Color
     var x *Node
-    if z.Left == nil {
+    if z.Left == nil { // @label:delete_case_0
         x = z.Right
         t.Transplant(z, z.Right)
     } else if z.Right == nil {
         x = z.Left
         t.Transplant(z, z.Left)
-    } else {
+    } else { // @label:delete_case_2
         y = t.Minimum(z.Right)
         yOriginalColor = y.Color
         x = y.Right
@@ -195,27 +256,60 @@ func (t *RedBlackTree) Delete(key int) {
             y.Right = z.Right
             y.Right.Parent = y
         }
-        t.Transplant(z, y)
+        t.Transplant(z, y) // @label:delete_transplant
         y.Left = z.Left
         y.Left.Parent = y
         y.Color = z.Color
     }
     if yOriginalColor == BLACK {
-        t.DeleteFixup(x)
+        t.DeleteFixup(x) // @label:delete_fix_call
     }
 }
 
-func (t *RedBlackTree) Search(key int) *Node {
-    current := t.Root
-    for current != nil {
-        if key == current.Key { return current }
-        if key < current.Key {
-            current = current.Left
+func (t *RedBlackTree) deleteFixup(x *Node) {
+    for x != t.Root && x.Color == BLACK { // @label:fix_delete_loop
+        if x == x.Parent.Left {
+            w := x.Parent.Right
+            if w.Color == RED { // @label:fix_delete_case1
+                w.Color = BLACK
+                x.Parent.Color = RED
+                t.LeftRotate(x.Parent)
+                w = x.Parent.Right
+            }
+            if w.Left.Color == BLACK && w.Right.Color == BLACK { // @label:fix_delete_case2
+                w.Color = RED
+                x = x.Parent
+            } else {
+                if w.Right.Color == BLACK { // @label:fix_delete_case3
+                    w.Left.Color = BLACK
+                    w.Color = RED
+                    t.RightRotate(w)
+                    w = x.Parent.Right
+                }
+                w.Color = x.Parent.Color // @label:fix_delete_case4
+                x.Parent.Color = BLACK
+                w.Right.Color = BLACK
+                t.LeftRotate(x.Parent)
+                x = t.Root
+            }
         } else {
+            // Symmetric case
+        }
+    }
+    x.Color = BLACK // @label:fix_delete_end
+}
+
+func (t *RedBlackTree) Search(key int) *Node {
+    current := t.Root // @label:search_root
+    for current != nil {
+        if key == current.Key { return current } // @label:search_found
+        if key < current.Key { // @label:search_left
+            current = current.Left
+        } else { // @label:search_right
             current = current.Right
         }
     }
-    return nil
+    return nil // @label:search_end
 }`
 };
 
@@ -499,22 +593,27 @@ export const redBlackTreeAlgorithm: AlgorithmGenerator<GraphData> = function* (i
     // Search
     function* search(key: number) {
         let current = tree.root;
-        yield* yieldState(`开始搜索 ${key}`, 'insert_bst', current ? [current.id] : []);
+        yield* yieldState(`开始搜索 ${key}`, 'search_root', current ? [current.id] : []);
         while (current) {
-            yield* yieldState(`访问节点 ${current.key}`, 'insert_bst', [current.id]);
             if (key === current.key) {
-                yield* yieldState(`找到节点 ${key}!`, 'insert_bst', [current.id]);
+                yield* yieldState(`找到节点 ${key}!`, 'search_found', [current.id]);
                 return;
             }
-            if (key < current.key) current = current.left;
-            else current = current.right;
+            if (key < current.key) {
+                yield* yieldState(`访问节点 ${current.key}, 向左查找`, 'search_left', [current.id]);
+                current = current.left;
+            }
+            else {
+                yield* yieldState(`访问节点 ${current.key}, 向右查找`, 'search_right', [current.id]);
+                current = current.right;
+            }
         }
-        yield* yieldState(`未找到节点 ${key}`, 'insert_bst');
+        yield* yieldState(`未找到节点 ${key}`, 'search_end');
     }
 
     // Modify (Mocked as Delete + Insert for Visualization)
     function* modify(oldKey: number, newKey: number) {
-        yield* yieldState(`准备修改节点: ${oldKey} -> ${newKey}`, 'insert_bst');
+        yield* yieldState(`准备修改节点: ${oldKey} -> ${newKey}`, 'search_root');
 
         // 1. Search to confirm existence
         let current = tree.root;
@@ -526,16 +625,16 @@ export const redBlackTreeAlgorithm: AlgorithmGenerator<GraphData> = function* (i
         }
 
         if (!found) {
-            yield* yieldState(`未找到节点 ${oldKey}，无法修改`, 'insert_bst');
+            yield* yieldState(`未找到节点 ${oldKey}，无法修改`, 'search_end');
             return;
         }
 
         // 2. Delete
-        yield* yieldState(`第一步：删除旧节点 ${oldKey}`, 'fix_insert');
+        yield* yieldState(`第一步：删除旧节点 ${oldKey}`, 'delete_search');
         yield* deleteNode(oldKey);
 
         // 3. Insert
-        yield* yieldState(`第二步：插入新节点 ${newKey}`, 'fix_insert');
+        yield* yieldState(`第二步：插入新节点 ${newKey}`, 'create_node');
         yield* insert(newKey);
 
         yield* yieldState(`修改完成`, 'fix_insert');
@@ -563,10 +662,11 @@ export const redBlackTreeAlgorithm: AlgorithmGenerator<GraphData> = function* (i
         let parent = xParent;
 
         while (node !== tree.root && (!node || node.color === 'BLACK')) {
+            yield* yieldState(`开始删除修复...`, 'fix_delete_loop', node ? [node.id] : []);
             if (node === parent!.left) {
                 let sibling = parent!.right;
                 if (sibling && sibling.color === 'RED') {
-                     yield* yieldState(`兄弟节点 ${sibling.key} 是红色 -> 变色 + 左旋`, 'fix_insert', [sibling.id]);
+                     yield* yieldState(`兄弟节点 ${sibling.key} 是红色 -> 变色 + 左旋`, 'fix_delete_case1', [sibling.id]);
                     sibling.color = 'BLACK';
                     parent!.color = 'RED';
                     tree.leftRotate(parent!);
@@ -574,19 +674,19 @@ export const redBlackTreeAlgorithm: AlgorithmGenerator<GraphData> = function* (i
                 }
                 if ((!sibling?.left || sibling.left.color === 'BLACK') &&
                     (!sibling?.right || sibling.right.color === 'BLACK')) {
-                     yield* yieldState(`兄弟节点的子节点全黑 -> 兄弟变红，向上回溯`, 'fix_insert', sibling ? [sibling.id] : []);
+                     yield* yieldState(`兄弟节点的子节点全黑 -> 兄弟变红，向上回溯`, 'fix_delete_case2', sibling ? [sibling.id] : []);
                     if (sibling) sibling.color = 'RED';
                     node = parent!;
                     parent = node.parent;
                 } else {
                     if (!sibling?.right || sibling.right.color === 'BLACK') {
-                         yield* yieldState(`兄弟右子黑，左子红 -> 兄弟右旋`, 'fix_insert');
+                         yield* yieldState(`兄弟右子黑，左子红 -> 兄弟右旋`, 'fix_delete_case3');
                         if (sibling?.left) sibling.left.color = 'BLACK';
                         if (sibling) sibling.color = 'RED';
                         if (sibling) tree.rightRotate(sibling);
                         sibling = parent!.right;
                     }
-                     yield* yieldState(`兄弟右子红 -> 变色 + 左旋`, 'fix_insert');
+                     yield* yieldState(`兄弟右子红 -> 变色 + 左旋`, 'fix_delete_case4');
                     if (sibling) sibling.color = parent!.color;
                     parent!.color = 'BLACK';
                     if (sibling?.right) sibling.right.color = 'BLACK';
@@ -597,7 +697,7 @@ export const redBlackTreeAlgorithm: AlgorithmGenerator<GraphData> = function* (i
                 // Symmetric
                 let sibling = parent!.left;
                 if (sibling && sibling.color === 'RED') {
-                    yield* yieldState(`兄弟节点 ${sibling.key} 是红色 -> 变色 + 右旋`, 'fix_insert', [sibling.id]);
+                    yield* yieldState(`兄弟节点 ${sibling.key} 是红色 -> 变色 + 右旋`, 'fix_delete_case1', [sibling.id]);
                     sibling.color = 'BLACK';
                     parent!.color = 'RED';
                     tree.rightRotate(parent!);
@@ -605,19 +705,19 @@ export const redBlackTreeAlgorithm: AlgorithmGenerator<GraphData> = function* (i
                 }
                 if ((!sibling?.right || sibling.right.color === 'BLACK') &&
                     (!sibling?.left || sibling.left.color === 'BLACK')) {
-                    yield* yieldState(`兄弟节点的子节点全黑 -> 兄弟变红，向上回溯`, 'fix_insert', sibling ? [sibling.id] : []);
+                    yield* yieldState(`兄弟节点的子节点全黑 -> 兄弟变红，向上回溯`, 'fix_delete_case2', sibling ? [sibling.id] : []);
                     if (sibling) sibling.color = 'RED';
                     node = parent!;
                     parent = node.parent;
                 } else {
                     if (!sibling?.left || sibling.left.color === 'BLACK') {
-                        yield* yieldState(`兄弟左子黑，右子红 -> 兄弟左旋`, 'fix_insert');
+                        yield* yieldState(`兄弟左子黑，右子红 -> 兄弟左旋`, 'fix_delete_case3');
                         if (sibling?.right) sibling.right.color = 'BLACK';
                         if (sibling) sibling.color = 'RED';
                         if (sibling) tree.leftRotate(sibling);
                         sibling = parent!.left;
                     }
-                    yield* yieldState(`兄弟左子红 -> 变色 + 右旋`, 'fix_insert');
+                    yield* yieldState(`兄弟左子红 -> 变色 + 右旋`, 'fix_delete_case4');
                     if (sibling) sibling.color = parent!.color;
                     parent!.color = 'BLACK';
                     if (sibling?.left) sibling.left.color = 'BLACK';
@@ -627,7 +727,7 @@ export const redBlackTreeAlgorithm: AlgorithmGenerator<GraphData> = function* (i
             }
         }
         if (node) node.color = 'BLACK';
-        yield* yieldState(`删除修复完成`, 'fix_insert');
+        yield* yieldState(`删除修复完成`, 'fix_delete_end');
     }
 
     function* deleteNode(key: number) {
@@ -638,11 +738,11 @@ export const redBlackTreeAlgorithm: AlgorithmGenerator<GraphData> = function* (i
         }
 
         if (!z) {
-             yield* yieldState(`未找到节点 ${key}，无需删除`, 'insert_bst');
+             yield* yieldState(`未找到节点 ${key}，无需删除`, 'delete_check');
              return;
         }
 
-        yield* yieldState(`找到节点 ${key}，准备删除`, 'insert_bst', [z.id]);
+        yield* yieldState(`找到节点 ${key}，准备删除`, 'delete_search', [z.id]);
 
         let y = z;
         let yOriginalColor = y.color;
@@ -650,14 +750,17 @@ export const redBlackTreeAlgorithm: AlgorithmGenerator<GraphData> = function* (i
         let xParent: RBNode | null;
 
         if (!z.left) {
+            yield* yieldState(`情况0：无左子 -> 用右子移植`, 'delete_case_0', [z.id]);
             x = z.right;
             xParent = z.parent;
             transplant(z, z.right);
         } else if (!z.right) {
+            yield* yieldState(`情况1：无右子 -> 用左子移植`, 'delete_case_0', [z.id]);
             x = z.left;
             xParent = z.parent;
             transplant(z, z.left);
         } else {
+            yield* yieldState(`情况2：双子 -> 找右子树最小节点替换`, 'delete_case_2', [z.id]);
             y = minimum(z.right);
             yOriginalColor = y.color;
             x = y.right;
@@ -670,17 +773,18 @@ export const redBlackTreeAlgorithm: AlgorithmGenerator<GraphData> = function* (i
                 if (y.right) y.right.parent = y;
             }
             transplant(z, y);
+            yield* yieldState(`移植完成`, 'delete_transplant', [y.id]);
             y.left = z.left;
             if (y.left) y.left.parent = y;
             y.color = z.color;
         }
 
-        yield* yieldState(`节点已移除，检查是否违反黑高性质...`, 'fix_insert');
+        yield* yieldState(`节点已移除，检查是否违反黑高性质...`, 'delete_fix_call');
 
         if (yOriginalColor === 'BLACK') {
             yield* deleteFixup(x, xParent);
         } else {
-            yield* yieldState(`删除的是红色节点，无需修复`, 'fix_insert');
+            yield* yieldState(`删除的是红色节点，无需修复`, 'delete_fix_call');
         }
     }
 
