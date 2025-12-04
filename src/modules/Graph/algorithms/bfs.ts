@@ -67,6 +67,8 @@ const getAdjacencyList = (graphData: GraphData): Map<string, string[]> => {
   return adjList;
 };
 
+const cloneGraph = (graph: GraphData): GraphData => JSON.parse(JSON.stringify(graph));
+
 // --- BFS Algorithm Generator ---
 export const bfsAlgorithm: AlgorithmGenerator<GraphData> = function* (initialGraph: GraphData, startNodeId: string = initialGraph.nodes[0]?.id) {
   if (!startNodeId) {
@@ -90,7 +92,7 @@ export const bfsAlgorithm: AlgorithmGenerator<GraphData> = function* (initialGra
   const visited = new Set<string>();
 
   yield {
-    state: graph,
+    state: cloneGraph(graph),
     log: "开始 BFS 算法...",
     codeLabel: 'initQueue'
   };
@@ -101,7 +103,7 @@ export const bfsAlgorithm: AlgorithmGenerator<GraphData> = function* (initialGra
   startNode.status = 'visiting'; // Mark as visiting (in queue)
 
   yield {
-    state: graph,
+    state: cloneGraph(graph),
     log: `将起始节点 ${startNodeId} 加入队列并标记为访问中。`,
     codeLabel: 'visitStart',
     highlightIndices: [graph.nodes.findIndex(n => n.id === startNodeId)],
@@ -109,7 +111,7 @@ export const bfsAlgorithm: AlgorithmGenerator<GraphData> = function* (initialGra
 
   while (queue.length > 0) {
     yield {
-      state: graph,
+      state: cloneGraph(graph),
       log: "检查队列，如果非空则继续。",
       codeLabel: 'loopQueue',
     };
@@ -119,7 +121,7 @@ export const bfsAlgorithm: AlgorithmGenerator<GraphData> = function* (initialGra
     currentNode.status = 'visited'; // Mark as visited
 
     yield {
-      state: graph,
+      state: cloneGraph(graph),
       log: `从队列中取出节点 ${currentNodeId}，标记为已访问。`,
       codeLabel: 'dequeue',
       highlightIndices: [graph.nodes.findIndex(n => n.id === currentNodeId)],
@@ -130,7 +132,7 @@ export const bfsAlgorithm: AlgorithmGenerator<GraphData> = function* (initialGra
     currentEdges.forEach(edge => edge.status = 'active'); // Mark connected edges as active
 
     yield {
-      state: graph,
+      state: cloneGraph(graph),
       log: `遍历节点 ${currentNodeId} 的所有邻居。`,
       codeLabel: 'loopNeighbors',
       highlightIndices: [graph.nodes.findIndex(n => n.id === currentNodeId)],
@@ -149,7 +151,7 @@ export const bfsAlgorithm: AlgorithmGenerator<GraphData> = function* (initialGra
       if (connectingEdge) connectingEdge.status = 'active';
 
       yield {
-        state: graph,
+        state: cloneGraph(graph),
         log: `检查邻居节点 ${neighborId} 是否已被访问。`,
         codeLabel: 'checkVisited',
         highlightIndices: [graph.nodes.findIndex(n => n.id === neighborId)],
@@ -164,7 +166,7 @@ export const bfsAlgorithm: AlgorithmGenerator<GraphData> = function* (initialGra
         if (connectingEdge) connectingEdge.status = 'traversed'; // Mark edge as part of BFS tree
 
         yield {
-          state: graph,
+          state: cloneGraph(graph),
           log: `节点 ${neighborId} 未访问，加入队列并标记为访问中。`,
           codeLabel: 'enqueue',
           highlightIndices: [graph.nodes.findIndex(n => n.id === neighborId)],
@@ -177,7 +179,7 @@ export const bfsAlgorithm: AlgorithmGenerator<GraphData> = function* (initialGra
   }
 
   yield {
-    state: graph,
+    state: cloneGraph(graph),
     log: "BFS 算法完成!",
   };
 };
