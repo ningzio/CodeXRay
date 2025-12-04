@@ -41,11 +41,13 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
           onChange={(e) => onSeek(Number(e.target.value))}
           className="flex-1 h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
         />
-      </div>      {/* Buttons & Speed */}
+      </div>
+
+      {/* Buttons & Speed */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        
+
         {/* Playback Buttons */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-center gap-2 w-full sm:w-auto">
           <button
             onClick={onReset}
             className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
@@ -81,7 +83,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
         </div>
 
         {/* Speed Control */}
-        <div className="flex items-center gap-3 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 w-full sm:w-auto">
+        <div className="flex items-center gap-3 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 w-full max-w-md sm:w-auto sm:max-w-none self-center sm:self-auto">
           <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">SPEED</span>
           <input
             type="range"
@@ -91,7 +93,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
             // Reverse scale: lower value = faster speed
             value={1050 - speed}
             onChange={(e) => onSpeedChange(1050 - Number(e.target.value))}
-            className="w-full sm:w-24 h-1.5 bg-slate-300 dark:bg-slate-600 rounded-lg appearance-none cursor-pointer accent-blue-400"
+            className="w-full sm:w-28 h-1.5 bg-slate-300 dark:bg-slate-600 rounded-lg appearance-none cursor-pointer accent-blue-400"
           />
         </div>
       </div>
