@@ -45,6 +45,7 @@ export type GraphNode = {
   y?: number; // For visualization positioning
   // Add status for visualization (e.g., visited, exploring)
   status?: 'unvisited' | 'visiting' | 'visited';
+  color?: 'red' | 'black'; // For Red-Black Trees
 };
 
 export type GraphEdge = {
