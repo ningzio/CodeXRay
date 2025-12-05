@@ -133,7 +133,7 @@ export const TreeVisualizer: React.FC<TreeVisualizerProps> = ({ step }) => {
                                 x={startX + i * cellWidth + cellWidth / 2}
                                 y={startY + cellHeight / 2 + 4}
                                 textAnchor="middle"
-                                className="fill-white dark:fill-slate-100 text-xs font-bold pointer-events-none select-none font-mono"
+                                className={`${(nodeColorClass.includes('slate-200') || nodeColorClass.includes('green-400') || nodeColorClass.includes('yellow-400')) ? 'fill-slate-800' : 'fill-white'} dark:fill-slate-100 text-xs font-bold pointer-events-none select-none font-mono`}
                             >
                                 {k}
                             </text>
