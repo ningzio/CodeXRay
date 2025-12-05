@@ -25,6 +25,75 @@ class BPlusTree {
     this.root = new BPlusNode(true);
   }
 
+  // --- Synchronous Logic for Generation ---
+  insertSync(key: number) {
+      if (this.root.keys.length === 0 && this.root.isLeaf) {
+          this.root.keys.push(key);
+          return;
+      }
+
+      let current = this.root;
+      while (!current.isLeaf) {
+          let i = 0;
+          while (i < current.keys.length && key >= current.keys[i]) i++;
+          current = current.children[i];
+      }
+
+      if (current.keys.includes(key)) return;
+
+      let insertPos = 0;
+      while (insertPos < current.keys.length && current.keys[insertPos] < key) insertPos++;
+      current.keys.splice(insertPos, 0, key);
+
+      if (current.keys.length >= ORDER) {
+          this.splitLeafSync(current);
+      }
+  }
+
+  splitLeafSync(node: BPlusNode) {
+      const newLeaf = new BPlusNode(true);
+      const mid = Math.floor(node.keys.length / 2);
+      newLeaf.keys = node.keys.splice(mid);
+      newLeaf.next = node.next;
+      node.next = newLeaf;
+      this.insertParentSync(node, newLeaf.keys[0], newLeaf);
+  }
+
+  insertParentSync(left: BPlusNode, key: number, right: BPlusNode) {
+      const parent = left.parent;
+      if (!parent) {
+          const newRoot = new BPlusNode(false);
+          newRoot.keys = [key];
+          newRoot.children = [left, right];
+          left.parent = newRoot;
+          right.parent = newRoot;
+          this.root = newRoot;
+          return;
+      }
+
+      let insertPos = 0;
+      while (insertPos < parent.keys.length && parent.keys[insertPos] < key) insertPos++;
+      parent.keys.splice(insertPos, 0, key);
+      parent.children.splice(insertPos + 1, 0, right);
+      right.parent = parent;
+
+      if (parent.keys.length >= ORDER) {
+          this.splitInternalSync(parent);
+      }
+  }
+
+  splitInternalSync(node: BPlusNode) {
+      const newInternal = new BPlusNode(false);
+      const mid = Math.floor(node.keys.length / 2);
+      const upKey = node.keys[mid];
+      newInternal.keys = node.keys.splice(mid + 1);
+      node.keys.pop();
+      newInternal.children = node.children.splice(mid + 1);
+      newInternal.children.forEach(c => c.parent = newInternal);
+      this.insertParentSync(node, upKey, newInternal);
+  }
+
+
   // --- Search ---
   search(key: number): { node: BPlusNode, index: number } | null {
     let current = this.root;
@@ -485,8 +554,17 @@ export const bPlusTreeAlgorithm: AlgorithmGenerator<GraphData> = function* (init
 };
 
 export const generateRandomBPlusTree = (_count: number): GraphData => {
-    // Return a simple tree for init
     const tree = new BPlusTree();
-    tree.root.keys = [10, 20];
+
+    // Generate 12-15 random numbers
+    const count = 12 + Math.floor(Math.random() * 4);
+    const values: number[] = [];
+    while (values.length < count) {
+        const val = Math.floor(Math.random() * 100) + 1;
+        if (!values.includes(val)) values.push(val);
+    }
+
+    values.forEach(v => tree.insertSync(v));
+
     return tree.toGraphData();
 };
