@@ -287,11 +287,16 @@ export const bPlusTreeAlgorithm: AlgorithmGenerator<GraphData> = function* (init
 
 
     function* yieldState(log: string, codeLabel?: string, highlights: string[] = []) {
+        const graphData = tree.toGraphData(highlights);
+        const highlightIndices = highlights
+            .map(id => graphData.nodes.findIndex(n => n.id === id))
+            .filter(i => i !== -1);
+
         yield {
-            state: tree.toGraphData(highlights),
+            state: graphData,
             log,
             codeLabel,
-            highlightIndices: []
+            highlightIndices
         };
     }
 
