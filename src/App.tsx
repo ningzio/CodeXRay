@@ -357,9 +357,9 @@ const AlgorithmRunner = ({ config, language, onLanguageChange, theme }: { config
   const VisualizerComponent = config.Visualizer;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-full content-start">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-full content-start min-h-0">
       {/* Main Stage (Left): 8 columns */}
-      <div className="lg:col-span-8 flex flex-col gap-6 lg:h-full lg:overflow-y-auto lg:pr-1 lg:pb-32 lg:scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
+      <div className="lg:col-span-8 flex flex-col gap-6 lg:h-full lg:overflow-y-auto lg:pr-1 lg:pb-32 lg:scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800 min-h-0">
 
         {/* Visualizer Window */}
         <Card className="relative overflow-hidden min-h-[400px] flex-none flex flex-col p-0">
@@ -410,17 +410,17 @@ const AlgorithmRunner = ({ config, language, onLanguageChange, theme }: { config
         </Card>
 
         {/* Algorithm Intel */}
-        <Card title="算法情报" className="min-h-[300px] flex flex-col overflow-visible">
+        <Card title="算法情报" className="min-h-[300px] flex flex-col overflow-hidden">
           <AlgorithmIntel profile={config.profile} />
         </Card>
       </div>
 
       {/* Sidebar (Right): 4 columns */}
-      <div className="lg:col-span-4 flex flex-col gap-6 lg:h-full lg:overflow-y-auto lg:pr-1 lg:pb-32 lg:scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
+      <div className="lg:col-span-4 flex flex-col gap-6 lg:h-full lg:overflow-y-auto lg:pr-1 lg:pb-32 lg:scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800 min-h-0">
         {/* Code X-Ray */}
         <Card
           title="代码透视"
-          className="min-h-[200px] flex flex-col p-0 overflow-visible"
+          className="min-h-[200px] flex flex-col p-0 overflow-hidden"
           action={
             <div className="flex items-center gap-1">
               {Object.entries(LANGUAGES).map(([key, label]) => (
