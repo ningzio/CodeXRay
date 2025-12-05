@@ -373,7 +373,15 @@ const AlgorithmRunner = ({ config, language, onLanguageChange, theme }: { config
           </div>
         </Card>
 
-        {/* Algorithm Intel (Moved here) */}
+        {/* Log Console (below animation) */}
+        <Card title="执行日志" className="min-h-[100px] flex-none font-mono text-sm">
+          <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+            <span className="text-blue-500">➜</span>
+            <span>{player.currentStep.log || "准备就绪"}</span>
+          </div>
+        </Card>
+
+        {/* Algorithm Intel */}
         <Card title="算法情报" className="min-h-[300px] flex flex-col overflow-visible">
           <AlgorithmIntel profile={config.profile} />
         </Card>
@@ -408,14 +416,6 @@ const AlgorithmRunner = ({ config, language, onLanguageChange, theme }: { config
             language={language}
             theme={theme}
           />
-        </Card>
-
-        {/* Log Console (Moved here) */}
-        <Card title="执行日志" className="min-h-[100px] flex-none font-mono text-sm">
-          <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-            <span className="text-blue-500">➜</span>
-            <span>{player.currentStep.log || "准备就绪"}</span>
-          </div>
         </Card>
       </div>
     </div>
