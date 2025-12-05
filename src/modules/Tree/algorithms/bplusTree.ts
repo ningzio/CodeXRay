@@ -244,7 +244,10 @@ export const bPlusTreeAlgorithm: AlgorithmGenerator<GraphData> = function* (init
             const target = nodeMap.get(e.target);
             if (!source || !target) return;
 
-            if (e.status === 'active') {
+            // Leaf links may be reset to default status; use the edge id prefix as a stable marker.
+            const isLeafLink = e.status === 'active' || e.id.startsWith('link-');
+
+            if (isLeafLink) {
                 // Leaf Link
                 source.next = target;
                 source.isLeaf = true;
