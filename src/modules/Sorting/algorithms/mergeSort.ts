@@ -103,7 +103,6 @@ func merge(arr []int, left, mid, right int) {
 
 export const mergeSort: AlgorithmGenerator<number[]> = function* (inputArray: number[]) {
   const arr = [...inputArray];
-  const temp = Array<number>(arr.length);
 
   yield {
     state: [...arr],
@@ -113,7 +112,7 @@ export const mergeSort: AlgorithmGenerator<number[]> = function* (inputArray: nu
     activeRange: [0, arr.length - 1],
   };
 
-  yield* mergeSortRecursive(arr, temp, 0, arr.length - 1);
+  yield* mergeSortRecursive(arr, 0, arr.length - 1);
 
   yield {
     state: [...arr],
@@ -126,7 +125,6 @@ export const mergeSort: AlgorithmGenerator<number[]> = function* (inputArray: nu
 
 function* mergeSortRecursive(
   arr: number[],
-  temp: number[],
   left: number,
   right: number,
 ): Generator<AlgorithmStep<number[]>, void, unknown> {
@@ -152,7 +150,7 @@ function* mergeSortRecursive(
     activeRange: [left, mid],
     codeLabel: 'divideLeft',
   };
-  yield* mergeSortRecursive(arr, temp, left, mid);
+  yield* mergeSortRecursive(arr, left, mid);
 
   yield {
     state: [...arr],
@@ -162,14 +160,13 @@ function* mergeSortRecursive(
     activeRange: [mid + 1, right],
     codeLabel: 'divideRight',
   };
-  yield* mergeSortRecursive(arr, temp, mid + 1, right);
+  yield* mergeSortRecursive(arr, mid + 1, right);
 
-  yield* merge(arr, temp, left, mid, right);
+  yield* merge(arr, left, mid, right);
 }
 
 function* merge(
   arr: number[],
-  temp: number[],
   left: number,
   mid: number,
   right: number,
@@ -183,36 +180,51 @@ function* merge(
     codeLabel: 'mergeStart',
   };
 
-  let i = left;
-  let j = mid + 1;
+  const leftSlice = arr.slice(left, mid + 1);
+  const rightSlice = arr.slice(mid + 1, right + 1);
+
+  let i = 0;
+  let j = 0;
   let k = left;
 
-  while (i <= mid && j <= right) {
+  while (i < leftSlice.length && j < rightSlice.length) {
+    const leftVal = leftSlice[i];
+    const rightVal = rightSlice[j];
+
     yield {
       state: [...arr],
-      log: `比较左侧 ${arr[i]} 与右侧 ${arr[j]}`,
-      highlightIndices: [i, j],
+      log: `比较左侧 ${leftVal} 与右侧 ${rightVal}`,
+      highlightIndices: [left + i, mid + 1 + j],
       secondaryIndices: [left, mid, right],
       activeRange: [left, right],
       codeLabel: 'compare',
     };
 
-    if (arr[i] <= arr[j]) {
-      temp[k] = arr[i];
+    if (leftVal <= rightVal) {
+      arr[k] = leftVal;
       i++;
     } else {
-      temp[k] = arr[j];
+      arr[k] = rightVal;
       j++;
     }
+
+    yield {
+      state: [...arr],
+      log: `写回位置 ${k} 为 ${arr[k]}`,
+      highlightIndices: [k],
+      secondaryIndices: [left, right],
+      activeRange: [left, right],
+      codeLabel: 'writeBack',
+    };
     k++;
   }
 
-  while (i <= mid) {
-    temp[k] = arr[i];
+  while (i < leftSlice.length) {
+    arr[k] = leftSlice[i];
     yield {
       state: [...arr],
-      log: `左半剩余元素 ${arr[i]} 暂存`,
-      highlightIndices: [i],
+      log: `左半剩余元素 ${arr[k]} 写回`,
+      highlightIndices: [k],
       secondaryIndices: [left, mid, right],
       activeRange: [left, right],
       codeLabel: 'copyLeft',
@@ -221,29 +233,17 @@ function* merge(
     k++;
   }
 
-  while (j <= right) {
-    temp[k] = arr[j];
+  while (j < rightSlice.length) {
+    arr[k] = rightSlice[j];
     yield {
       state: [...arr],
-      log: `右半剩余元素 ${arr[j]} 暂存`,
-      highlightIndices: [j],
+      log: `右半剩余元素 ${arr[k]} 写回`,
+      highlightIndices: [k],
       secondaryIndices: [left, mid, right],
       activeRange: [left, right],
       codeLabel: 'copyRight',
     };
     j++;
     k++;
-  }
-
-  for (let t = left; t <= right; t++) {
-    arr[t] = temp[t];
-    yield {
-      state: [...arr],
-      log: `写回位置 ${t} 为 ${arr[t]}`,
-      highlightIndices: [t],
-      secondaryIndices: [left, right],
-      activeRange: [left, right],
-      codeLabel: 'writeBack',
-    };
   }
 }
