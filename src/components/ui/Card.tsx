@@ -13,11 +13,11 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export const Card: React.FC<CardProps> = ({ title, action, className, children, ...props }) => {
   return (
-    <div 
+    <div
       className={cn(
-        "bg-white/60 dark:bg-slate-950/40 backdrop-blur-xl rounded-2xl border border-slate-200/60 dark:border-white/10 shadow-sm dark:shadow-2xl dark:shadow-black/50",
+        "bg-white/60 dark:bg-slate-950/40 backdrop-blur-xl rounded-2xl border border-slate-200/60 dark:border-white/10 shadow-sm dark:shadow-2xl dark:shadow-black/50 overflow-hidden",
         className
-      )} 
+      )}
       {...props}
     >
       {(title || action) && (
@@ -26,7 +26,7 @@ export const Card: React.FC<CardProps> = ({ title, action, className, children, 
           {action && <div>{action}</div>}
         </div>
       )}
-      <div className="p-4 h-full">
+      <div className="p-4 h-full min-h-0">
         {children}
       </div>
     </div>
