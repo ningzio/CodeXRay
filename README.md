@@ -21,6 +21,12 @@ CodeXRay 是一个 **AI 驱动的开源算法可视化平台**，旨在通过 "X
 
 CodeXRay 采用了一系列先进的设计模式来确保扩展性和性能：
 
+## 📚 已支持算法 (Supported Algorithms)
+
+-   **排序 (Sorting):** 冒泡排序、归并排序、快速排序
+-   **图论 (Graph):** 广度优先搜索 (BFS)、深度优先搜索 (DFS)、Dijkstra 最短路径
+-   **树结构 (Tree):** AVL 树、红黑树、B+ 树
+
 ### 1. Generator/Snapshot 模式 (逻辑与视图分离)
 为了实现可逆的时间轴控制（播放、暂停、回退），我们不直接在组件中执行算法。
 -   **Generators:** 算法逻辑被封装为 TypeScript Generator 函数。

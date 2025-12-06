@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo } from 'react';
 import { Code2, GitGraph, Network } from 'lucide-react';
 import { bubbleSort, BUBBLE_SORT_CODE } from './modules/Sorting/algorithms/bubbleSort';
 import { quickSort, QUICK_SORT_CODE } from './modules/Sorting/algorithms/quickSort';
+import { mergeSort, MERGE_SORT_CODE } from './modules/Sorting/algorithms/mergeSort';
 import { SortingVisualizer } from './modules/Sorting/components/SortingVisualizer';
 import { bfsAlgorithm, BFS_CODE } from './modules/Graph/algorithms/bfs';
 import { dfsAlgorithm, DFS_CODE } from './modules/Graph/algorithms/dfs';
@@ -112,6 +113,31 @@ const ALGORITHMS: Record<string, AlgoConfig<any>> = {
       ]
     },
     code: BUBBLE_SORT_CODE,
+    getInitialData: () => generateRandomArray(12),
+    Visualizer: SortingVisualizer,
+    type: 'sorting',
+  },
+  merge: {
+    name: '归并排序 (Merge Sort)',
+    func: mergeSort,
+    profile: {
+      complexity: {
+        time: 'O(n log n)',
+        space: 'O(n)',
+        bestCase: 'O(n log n)',
+        worstCase: 'O(n log n)',
+      },
+      description: '经典的分治排序算法，将数组一分为二分别排序，再线性归并。',
+      howItWorks: '递归地将数组分成左右两半，直到子数组长度为1，再通过双指针线性合并。归并阶段会使用辅助数组暂存有序结果。',
+      keyConcepts: ['分治法', '稳定排序', '外部排序友好', '需要额外空间'],
+      scenarios: ['需要稳定性的排序需求', '链表排序 (易于合并)', '外部排序/磁盘排序', '并行化友好 (左右分支可并行)'],
+      pitfalls: ['额外 O(n) 空间开销', '递归实现可能导致深度开销', '合并时指针边界容易出错'],
+      links: [
+        { label: 'Wikipedia', url: 'https://en.wikipedia.org/wiki/Merge_sort' },
+        { label: 'VisuAlgo', url: 'https://visualgo.net/en/sorting' },
+      ],
+    },
+    code: MERGE_SORT_CODE,
     getInitialData: () => generateRandomArray(12),
     Visualizer: SortingVisualizer,
     type: 'sorting',
