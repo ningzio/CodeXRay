@@ -11,24 +11,27 @@ export const MERGE_SORT_CODE: Record<SupportedLanguage, string> = {
 }
 
 async function merge(arr, left, mid, right) {
-  const merged = [];
-  let i = left, j = mid + 1;
+  const leftPart = arr.slice(left, mid + 1);
+  const rightPart = arr.slice(mid + 1, right + 1);
+  let i = 0, j = 0, k = left;
 
-  while (i <= mid && j <= right) {
-    if (arr[i] <= arr[j]) {               // @label:compare
-      merged.push(arr[i]);
-      i++;
+  while (i < leftPart.length && j < rightPart.length) {
+    const leftVal = leftPart[i];
+    const rightVal = rightPart[j];
+
+    if (leftVal <= rightVal) {             // @label:compare
+      arr[k++] = leftPart[i++];            // @label:writeBack
     } else {
-      merged.push(arr[j]);
-      j++;
+      arr[k++] = rightPart[j++];           // @label:writeBack
     }
   }
 
-  while (i <= mid) merged.push(arr[i++]);   // @label:copyLeft
-  while (j <= right) merged.push(arr[j++]); // @label:copyRight
+  while (i < leftPart.length) {
+    arr[k++] = leftPart[i++];              // @label:copyLeft
+  }
 
-  for (let k = 0; k < merged.length; k++) {
-    arr[left + k] = merged[k];              // @label:writeBack
+  while (j < rightPart.length) {
+    arr[k++] = rightPart[j++];             // @label:copyRight
   }
 }`,
   python: `def merge_sort(arr, left, right):
@@ -42,26 +45,28 @@ async function merge(arr, left, mid, right) {
 
 
 def merge(arr, left, mid, right):
-    merged = []
-    i, j = left, mid + 1
+    left_part = arr[left:mid+1]
+    right_part = arr[mid+1:right+1]
+    i, j, k = 0, 0, left
 
-    while i <= mid and j <= right:
-        if arr[i] <= arr[j]:            # @label:compare
-            merged.append(arr[i])
+    while i < len(left_part) and j < len(right_part):
+        if left_part[i] <= right_part[j]:    # @label:compare
+            arr[k] = left_part[i]
             i += 1
         else:
-            merged.append(arr[j])
+            arr[k] = right_part[j]
             j += 1
+        k += 1                              # @label:writeBack
 
-    while i <= mid:
-        merged.append(arr[i])           # @label:copyLeft
+    while i < len(left_part):               # @label:copyLeft
+        arr[k] = left_part[i]
         i += 1
-    while j <= right:
-        merged.append(arr[j])           # @label:copyRight
-        j += 1
+        k += 1
 
-    for k, val in enumerate(merged):
-        arr[left + k] = val             # @label:writeBack
+    while j < len(right_part):              # @label:copyRight
+        arr[k] = right_part[j]
+        j += 1
+        k += 1
 `,
   go: `func mergeSort(arr []int, left, right int) {
     if left >= right {
@@ -75,30 +80,30 @@ def merge(arr, left, mid, right):
 }
 
 func merge(arr []int, left, mid, right int) {
-    merged := []int{}
-    i, j := left, mid+1
+    leftPart := append([]int{}, arr[left:mid+1]...)
+    rightPart := append([]int{}, arr[mid+1:right+1]...)
+    i, j, k := 0, 0, left
 
-    for i <= mid && j <= right {
-        if arr[i] <= arr[j] {           // @label:compare
-            merged = append(merged, arr[i])
+    for i < len(leftPart) && j < len(rightPart) {
+        if leftPart[i] <= rightPart[j] {     // @label:compare
+            arr[k] = leftPart[i]
             i++
         } else {
-            merged = append(merged, arr[j])
+            arr[k] = rightPart[j]
             j++
         }
+        k++                                  // @label:writeBack
     }
 
-    for i <= mid {                      // @label:copyLeft
-        merged = append(merged, arr[i])
+    for i < len(leftPart) {                  // @label:copyLeft
+        arr[k] = leftPart[i]
         i++
+        k++
     }
-    for j <= right {                    // @label:copyRight
-        merged = append(merged, arr[j])
+    for j < len(rightPart) {                 // @label:copyRight
+        arr[k] = rightPart[j]
         j++
-    }
-
-    for k, val := range merged {
-        arr[left+k] = val               // @label:writeBack
+        k++
     }
 }`,
 };
@@ -182,65 +187,76 @@ function* merge(
     codeLabel: 'mergeStart',
   };
 
-  let i = left;
-  let j = mid + 1;
-  const merged: number[] = [];
+  const leftPart = arr.slice(left, mid + 1);
+  const rightPart = arr.slice(mid + 1, right + 1);
+  let i = 0;
+  let j = 0;
+  let k = left;
 
-  while (i <= mid && j <= right) {
+  while (i < leftPart.length && j < rightPart.length) {
+    const leftIndex = left + i;
+    const rightIndex = mid + 1 + j;
+    const nextWrite = k;
+
     yield {
       state: [...arr],
-      log: `比较左侧 ${arr[i]} 与右侧 ${arr[j]}`,
-      highlightIndices: [i, j],
-      secondaryIndices: [left, mid, right],
+      log: `比较左侧 ${leftPart[i]} 与右侧 ${rightPart[j]}`,
+      highlightIndices: [leftIndex, rightIndex],
+      secondaryIndices: [left, mid, right, nextWrite],
       activeRange: [left, right],
       codeLabel: 'compare',
     };
 
-    if (arr[i] <= arr[j]) {
-      merged.push(arr[i]);
+    if (leftPart[i] <= rightPart[j]) {
+      arr[k] = leftPart[i];
       i++;
     } else {
-      merged.push(arr[j]);
+      arr[k] = rightPart[j];
       j++;
     }
-  }
 
-  while (i <= mid) {
-    merged.push(arr[i]);
     yield {
       state: [...arr],
-      log: `左半剩余元素 ${arr[i]} 收集`,
-      highlightIndices: [i],
-      secondaryIndices: [left, mid, right],
-      activeRange: [left, right],
-      codeLabel: 'copyLeft',
-    };
-    i++;
-  }
-
-  while (j <= right) {
-    merged.push(arr[j]);
-    yield {
-      state: [...arr],
-      log: `右半剩余元素 ${arr[j]} 收集`,
-      highlightIndices: [j],
-      secondaryIndices: [left, mid, right],
-      activeRange: [left, right],
-      codeLabel: 'copyRight',
-    };
-    j++;
-  }
-
-  for (let offset = 0; offset < merged.length; offset++) {
-    arr[left + offset] = merged[offset];
-    yield {
-      state: [...arr],
-      log: `写回位置 ${left + offset} 为 ${merged[offset]}`,
-      highlightIndices: [left + offset],
+      log: `写回位置 ${k} 为 ${arr[k]}`,
+      highlightIndices: [k],
       secondaryIndices: [left, right],
       activeRange: [left, right],
       codeLabel: 'writeBack',
     };
+
+    k++;
+  }
+
+  while (i < leftPart.length) {
+    arr[k] = leftPart[i];
+
+    yield {
+      state: [...arr],
+      log: `左半剩余元素 ${arr[k]} 写回位置 ${k}`,
+      highlightIndices: [k],
+      secondaryIndices: [left, mid, right],
+      activeRange: [left, right],
+      codeLabel: 'copyLeft',
+    };
+
+    i++;
+    k++;
+  }
+
+  while (j < rightPart.length) {
+    arr[k] = rightPart[j];
+
+    yield {
+      state: [...arr],
+      log: `右半剩余元素 ${arr[k]} 写回位置 ${k}`,
+      highlightIndices: [k],
+      secondaryIndices: [left, mid, right],
+      activeRange: [left, right],
+      codeLabel: 'copyRight',
+    };
+
+    j++;
+    k++;
   }
 
   yield {
