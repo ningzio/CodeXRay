@@ -41,9 +41,9 @@ export const SortingVisualizer: React.FC<SortingVisualizerProps> = ({ step }) =>
 
           return (
             <motion.div
-              key={value} // Using value as key triggers layout animation on swap
+              key={`${value}-${index}`}
               layout
-              transition={{ 
+              transition={{
                 type: "spring", 
                 stiffness: 300, 
                 damping: 25 
