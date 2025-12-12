@@ -172,7 +172,8 @@ const toGraphData = (map: GoMapState, highlights: string[] = []): GraphData => {
 
 // --- Generator ---
 
-export const goMapAlgorithm: AlgorithmGenerator<GraphData> = function* (initialData: GraphData, operation?: { type: 'insert' | 'delete' | 'search', value: { key: string, value: string } }) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const goMapAlgorithm: AlgorithmGenerator<GraphData> = function* (initialData: GraphData, operation?: { type: 'insert' | 'delete' | 'search', value: any }) {
     let mapState: GoMapState;
 
     const metaNode = initialData.nodes.find(n => n.id === 'meta-state');
@@ -376,7 +377,19 @@ export const goMapAlgorithm: AlgorithmGenerator<GraphData> = function* (initialD
     }
 
     if (operation.type === 'insert') {
-        const gen = insert(operation.value.key, operation.value.value);
+        let key: string;
+        let val: string;
+
+        if (typeof operation.value === 'object' && operation.value !== null && 'key' in operation.value) {
+             key = String(operation.value.key);
+             val = String(operation.value.value);
+        } else {
+             // Assume simple input (number or string)
+             key = String(operation.value);
+             val = `v:${key}`;
+        }
+
+        const gen = insert(key, val);
         let res = gen.next();
         while(!res.done) {
             yield {
@@ -387,6 +400,6 @@ export const goMapAlgorithm: AlgorithmGenerator<GraphData> = function* (initialD
             };
             res = gen.next();
         }
-        yield { state: toGraphData(mapState), log: `Inserted ${operation.value.key}` };
+        yield { state: toGraphData(mapState), log: `Inserted ${key}` };
     }
 };
