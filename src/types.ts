@@ -34,7 +34,7 @@ export type Algorithm<T> = {
   label: string;
   profile: AlgorithmProfile;
   run: AlgorithmGenerator<T>;
-  code: Record<SupportedLanguage, string>; // Map of language to display code with @label comments
+  code: Partial<Record<SupportedLanguage, string>>; // Map of language to display code with @label comments
 };
 
 // --- Graph Types ---

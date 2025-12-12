@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
-import { Code2, GitGraph, Network } from 'lucide-react';
+import { Code2, GitGraph, Network, Box } from 'lucide-react';
 import { bubbleSort, BUBBLE_SORT_CODE } from './modules/Sorting/algorithms/bubbleSort';
 import { quickSort, QUICK_SORT_CODE } from './modules/Sorting/algorithms/quickSort';
 import { mergeSort, MERGE_SORT_CODE } from './modules/Sorting/algorithms/mergeSort';
@@ -13,6 +13,9 @@ import { redBlackTreeAlgorithm, RED_BLACK_TREE_CODE, generateRandomRedBlackTree 
 import { bPlusTreeAlgorithm, generateRandomBPlusTree } from './modules/Tree/algorithms/bplusTree';
 import { B_PLUS_TREE_CODE } from './modules/Tree/algorithms/bplusTreeCode';
 import { TreeVisualizer } from './modules/Tree/components/TreeVisualizer';
+import { goMapAlgorithm } from './modules/Hash/algorithms/goMap';
+import { MapVisualizer } from './modules/Hash/components/MapVisualizer';
+import { GO_MAP_CODE as GO_MAP_CODE_DISPLAY } from './modules/Hash/algorithms/goMapCode';
 import { PlayerControls } from './components/ui/PlayerControls';
 import { CodeViewer } from './components/ui/CodeViewer';
 import { Sidebar, type SidebarGroup } from './components/layout/Sidebar';
@@ -76,15 +79,21 @@ const SAMPLE_WEIGHTED_GRAPH: GraphData = {
   directed: false,
 };
 
+const SAMPLE_MAP: GraphData = {
+    nodes: [],
+    edges: [],
+    directed: true
+};
+
 // --- Algorithm Configuration ---
 type AlgoConfig<T> = {
   name: string;
   func: AlgorithmGenerator<T>;
   profile: AlgorithmProfile;
-  code: Record<SupportedLanguage, string>;
+  code: Partial<Record<SupportedLanguage, string>>;
   getInitialData: () => T;
   Visualizer: React.ComponentType<{ step: AlgorithmStep<T> }>;
-  type: 'sorting' | 'graph' | 'tree';
+  type: 'sorting' | 'graph' | 'tree' | 'hash';
   startNodeId?: string;
   interactive?: boolean;
 };
@@ -321,6 +330,32 @@ const ALGORITHMS: Record<string, AlgoConfig<any>> = {
     type: 'tree',
     interactive: true,
   },
+  gomap: {
+    name: 'Go Map (Hash Table)',
+    func: goMapAlgorithm,
+    profile: {
+      complexity: {
+        time: 'O(1)',
+        space: 'O(n)',
+        bestCase: 'O(1)',
+        worstCase: 'O(n) (Collision Storm)'
+      },
+      description: 'Golang Map 的内部实现，基于拉链法（Bucket+Overflow）的哈希表。',
+      howItWorks: '使用哈希值的低位选择 Bucket，高 8 位 (tophash) 在 Bucket 内快速定位。每个 Bucket 存 8 个键值对。满时链接 Overflow Bucket。',
+      keyConcepts: ['Hash Bucket', 'Tophash', 'Overflow Linking', 'Resizing (Evacuation)'],
+      scenarios: ['快速键值查找', 'Go 语言标准库 map', '缓存系统'],
+      pitfalls: ['哈希冲突导致性能下降', '扩容时需要重新哈希 (Go 是渐进式扩容，这里演示一次性扩容)', '非线程安全'],
+      links: [
+        { label: 'Go Source Code', url: 'https://github.com/golang/go/blob/master/src/runtime/map.go' },
+        { label: 'Go Map Internals', url: 'https://dave.cheney.net/2018/05/29/how-the-go-runtime-implements-maps-efficiently-without-generics' }
+      ]
+    },
+    code: GO_MAP_CODE_DISPLAY,
+    getInitialData: () => SAMPLE_MAP,
+    Visualizer: MapVisualizer,
+    type: 'hash',
+    interactive: true,
+  },
 };
 
 const LANGUAGES: Record<SupportedLanguage, string> = {
@@ -343,7 +378,7 @@ const AlgorithmRunner = ({ config, language, onLanguageChange, theme }: { config
          // eslint-disable-next-line @typescript-eslint/no-explicit-any
          return (config.func as any)(initialData, interactiveOp);
       }
-      if (config.type === 'graph' || config.type === 'tree') {
+      if (config.type === 'graph' || config.type === 'tree' || config.type === 'hash') {
         return (config.func as AlgorithmGenerator<GraphData>)(initialData, config.startNodeId);
       } else {
         return (config.func as AlgorithmGenerator<number[]>)(initialData);
@@ -358,7 +393,7 @@ const AlgorithmRunner = ({ config, language, onLanguageChange, theme }: { config
     let newData;
     if (config.type === 'sorting') {
       newData = generateRandomArray(12);
-    } else if (config.type === 'graph' || config.type === 'tree') {
+    } else if (config.type === 'graph' || config.type === 'tree' || config.type === 'hash') {
       newData = JSON.parse(JSON.stringify(config.getInitialData())) as GraphData;
       newData.nodes.forEach(node => node.status = 'unvisited');
       newData.edges.forEach(edge => edge.status = 'default');
@@ -449,23 +484,27 @@ const AlgorithmRunner = ({ config, language, onLanguageChange, theme }: { config
           className="min-h-[200px] flex flex-col p-0 overflow-hidden"
           action={
             <div className="flex items-center gap-1">
-              {Object.entries(LANGUAGES).map(([key, label]) => (
-                <button
-                  key={key}
-                  onClick={() => onLanguageChange(key as SupportedLanguage)}
-                  className={`px-2 py-1 rounded text-xs font-medium transition-all ${language === key
-                      ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-300'
-                      : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50'
-                    }`}
-                >
-                  {label}
-                </button>
-              ))}
+              {Object.entries(LANGUAGES).map(([key, label]) => {
+                const langKey = key as SupportedLanguage;
+                if (!config.code[langKey]) return null;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => onLanguageChange(langKey)}
+                    className={`px-2 py-1 rounded text-xs font-medium transition-all ${language === key
+                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-300'
+                        : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50'
+                      }`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
             </div>
           }
         >
           <CodeViewer
-            code={config.code[language]}
+            code={config.code[language] || "No code available for this language."}
             activeLabel={player.currentStep.codeLabel}
             language={language}
             theme={theme}
@@ -490,6 +529,7 @@ function App() {
       sorting: [],
       graph: [],
       tree: [],
+      hash: [],
     };
 
     Object.entries(ALGORITHMS).forEach(([key, algo]) => {
@@ -502,6 +542,7 @@ function App() {
       { id: 'sorting', label: '排序算法', icon: Code2, items: groups.sorting },
       { id: 'graph', label: '图算法', icon: GitGraph, items: groups.graph },
       { id: 'tree', label: '树算法', icon: Network, items: groups.tree },
+      { id: 'hash', label: '哈希算法', icon: Box, items: groups.hash },
     ];
   }, []);
 
